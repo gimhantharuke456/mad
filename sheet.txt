@@ -1,0 +1,262 @@
+### Mobile Application Development Cheat Sheet
+
+---
+
+### **Kotlin for Android**
+
+**Why Kotlin?**
+- Less code, greater readability
+- Interoperability with Java
+- Safe and easy to learn
+- Supports Android Jetpack and libraries
+
+**Type Inference**
+- Automatically determines variable type.
+
+**Null Safety**
+- Prevents null pointer exceptions with `null` handling (`?` and `!!`).
+
+---
+
+### **Android Project Structure**
+- **src/main/java**: Java/Kotlin source files.
+- **res/layout**: XML layout files.
+- **res/values**: XML resource files (strings, colors).
+
+---
+
+### **Activity Lifecycle**
+- **onCreate()**: Initialize activity.
+- **onStart()**: Activity becomes visible.
+- **onResume()**: Activity starts interacting with the user.
+- **onPause()**: Another activity is taking focus.
+- **onStop()**: Activity no longer visible.
+- **onDestroy()**: Activity is destroyed.
+
+---
+
+### **Intents**
+- **Explicit Intent**: Specific component.
+  ```kotlin
+  val intent = Intent(this, TargetActivity::class.java)
+  startActivity(intent)
+  ```
+
+- **Implicit Intent**: General action.
+  ```kotlin
+  val intent = Intent(Intent.ACTION_VIEW)
+  intent.data = Uri.parse("http://www.example.com")
+  startActivity(intent)
+  ```
+
+**Features:**
+- **Starting Activities**: `startActivity(intent)`
+- **Starting Services**: `startService(intent)`
+- **Broadcasting**: `sendBroadcast(intent)`
+
+---
+
+### **Broadcast Receivers**
+- Listen for system-wide broadcast announcements.
+  ```kotlin
+  class MyReceiver : BroadcastReceiver() {
+      override fun onReceive(context: Context, intent: Intent) {
+          // Handle the broadcast
+      }
+  }
+  ```
+
+---
+
+### **ViewModel**
+- Manages UI-related data lifecycle.
+  ```kotlin
+  class MainActivityViewModel : ViewModel() {
+      private val _data = MutableLiveData<String>()
+      val data: LiveData<String> = _data
+
+      fun setData(value: String) {
+          _data.value = value
+      }
+  }
+  ```
+
+**Usage:**
+  ```kotlin
+  val viewModel = ViewModelProvider(this).get(MainActivityViewModel::class.java)
+  ```
+
+---
+
+### **RecyclerView**
+1. **Add Dependency:**
+   ```gradle
+   implementation 'androidx.recyclerview:recyclerview:1.3.1'
+   ```
+
+2. **Layout:**
+   ```xml
+   <androidx.recyclerview.widget.RecyclerView
+       android:id="@+id/recyclerView"
+       android:layout_width="match_parent"
+       android:layout_height="match_parent"/>
+   ```
+
+3. **Adapter:**
+   ```kotlin
+   class MyAdapter(private val dataList: List<String>) : RecyclerView.Adapter<MyAdapter.ViewHolder>() {
+       class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+           val textView: TextView = itemView.findViewById(R.id.textView)
+       }
+
+       override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
+           val view = LayoutInflater.from(parent.context).inflate(R.layout.item_layout, parent, false)
+           return ViewHolder(view)
+       }
+
+       override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+           holder.textView.text = dataList[position]
+       }
+
+       override fun getItemCount() = dataList.size
+   }
+   ```
+
+4. **Activity:**
+   ```kotlin
+   val recyclerView: RecyclerView = findViewById(R.id.recyclerView)
+   recyclerView.layoutManager = LinearLayoutManager(this)
+   recyclerView.adapter = MyAdapter(myDataList)
+   ```
+
+---
+
+### **Room Database**
+1. **Dependencies:**
+   ```gradle
+   implementation "androidx.room:room-runtime:2.5.0"
+   kapt "androidx.room:room-compiler:2.5.0"
+   implementation "androidx.room:room-ktx:2.5.0"
+   ```
+
+2. **Entity:**
+   ```kotlin
+   @Entity
+   data class User(
+       @PrimaryKey val uid: Int,
+       @ColumnInfo(name = "first_name") val firstName: String?,
+       @ColumnInfo(name = "last_name") val lastName: String?
+   )
+   ```
+
+3. **DAO:**
+   ```kotlin
+   @Dao
+   interface UserDao {
+       @Query("SELECT * FROM user")
+       fun getAll(): List<User>
+
+       @Insert
+       fun insertAll(vararg users: User)
+   }
+   ```
+
+4. **Database:**
+   ```kotlin
+   @Database(entities = [User::class], version = 1)
+   abstract class AppDatabase : RoomDatabase() {
+       abstract fun userDao(): UserDao
+   }
+   ```
+
+5. **Usage:**
+   ```kotlin
+   val db = Room.databaseBuilder(
+       applicationContext,
+       AppDatabase::class.java, "database-name"
+   ).build()
+   ```
+
+---
+
+### **Services**
+
+**Types:**
+- **Foreground Service**: User-visible ongoing operations (e.g., music player).
+- **Background Service**: Long-running operations in the background.
+- **Bound Service**: Allows components to bind and interact with the service.
+
+**Example Foreground Service:**
+```kotlin
+class MyForegroundService : Service() {
+    override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
+        val notification = Notification.Builder(this, CHANNEL_ID)
+            .setContentTitle("Service Running")
+            .setContentText("Service is running in the foreground")
+            .setSmallIcon(R.drawable.ic_notification)
+            .build()
+        startForeground(1, notification)
+        return START_STICKY
+    }
+
+    override fun onBind(intent: Intent): IBinder? {
+        return null
+    }
+}
+```
+
+---
+
+### **Creating Tables in SQL**
+```sql
+CREATE TABLE User (
+    id INTEGER PRIMARY KEY,
+    firstName TEXT,
+    lastName TEXT
+);
+```
+
+---
+
+### **Example Code Snippets**
+
+**ViewModel Usage in Activity:**
+```kotlin
+val model = ViewModelProvider(this).get(MainActivityViewModel::class.java)
+model.data.observe(this, Observer { data ->
+    // Update UI
+})
+```
+
+**Data Model Class:**
+```kotlin
+data class User(val id: Int, val name: String, val age: Int)
+```
+
+**RecyclerView Item Layout (item_layout.xml):**
+```xml
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal">
+
+    <TextView
+        android:id="@+id/textView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="16dp"/>
+</LinearLayout>
+```
+
+---
+
+### **Exam Tips**
+- **Understand the lifecycle of activities and fragments.**
+- **Practice writing concise Kotlin code.**
+- **Be familiar with Room database setup and usage.**
+- **Understand how to implement RecyclerView for lists.**
+- **Know the difference and use cases of various types of Intents and Services.**
+
+---
+
+Keep this cheat sheet handy to quickly reference key concepts and code snippets during your exam. Good luck!
