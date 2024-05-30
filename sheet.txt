@@ -791,7 +791,7 @@ datePicker.init(2024, 5, 28) { view, year, monthOfYear, dayOfMonth ->
     Toast.makeText(this, "Selected date: $selectedDate", Toast.LENGTH_SHORT).show()
 }
 ```
-mad
+
 
 ---
 
