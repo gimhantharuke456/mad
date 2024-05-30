@@ -771,6 +771,14 @@ class MainActivity : AppCompatActivity() {
 - **Flexibility:** Enables developers to decide where coroutines should run, such as the main thread or background, using dispatchers.
 - **Usage:** Widely employed for network API calls, database transactions, file I/O operations, and any other tasks that could potentially block the main thread.
 
+- **CoroutineScope:** Manages coroutine lifecycle and provides a context for coroutine execution.
+- **Cancellation:** Cancelling a CoroutineScope cancels all coroutines launched within it.
+- **Dispatchers:** Class providing thread pools and contexts for coroutine execution.
+- **Dispatchers.Default:** Used for CPU-intensive tasks, creates threads matching CPU cores.
+- **Dispatchers.IO:** Optimized for IO-bound tasks, like file operations or network requests.
+- **Dispatchers.Main:** Executes operations on the UI thread, suitable for UI updates.
+- **Dispatchers.Unconfined:** For coroutines without a specific thread context, can run on any thread.
+
 **Coroutine Example:**
 ```kotlin
 class MainActivity : AppCompatActivity() {
