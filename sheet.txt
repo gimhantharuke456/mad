@@ -266,6 +266,9 @@ interface CourseDao {
 
 **c) Lifecycle-Aware Components and Room Database Interaction**
 - **ViewModel**: ViewModel interacts with the Room database and stores UI-related data. This data survives configuration changes.
+Lifecycle Awareness: ViewModel is designed to be lifecycle-aware, meaning it won't cause 
+memory leaks and it'll be cleared once its associated lifecycle is destroyed.
+
 - **LiveData**: Used within ViewModel to observe data changes. When data in the database changes, LiveData updates the UI components.
 - **Repository**: Acts as a mediator between ViewModel and Room database. It handles data operations and abstracts the data source from ViewModel.
 
@@ -482,6 +485,21 @@ override fun onCreate(savedInstanceState: Bundle?) {
     cbAgree = findViewById(R.id.cbAgree)
 }
 
+**implement the displayAlert function**
+
+fun displayAlert(title:String, message:String){
+ val builder = AlertDialog.Builder(this)
+ builder.setTitle(title)
+ builder.setMessage(message)
+ builder.setPositiveButton("OK") { dialog, which ->
+ // Do something when the "OK" button is clicked
+ }
+ val dialog = builder.create()
+ dialog.show()
+}
+
+**implement the submit function**
+
 fun submit(v: View) {
     val myForm = FormData(
         edtStudentId.text.toString(),
@@ -502,7 +520,18 @@ fun submit(v: View) {
     }
 
     // Similar validation for year, semester, and agreement
+**is ValidationResult.Empty**
+is ValidationResult.Empty ->{
+val tv: TextView = spnSemester.selectedView  as TextView
+tv.error = ""
+tv.text = spnSemesterValidation.errorMessage
 }
+
+**is ValidationResult.Invalid **
+is ValidationResult.Invalid ->{
+displayAlert("Error" , cbAgreeValidation. errorMessage)
+}
+
 ```
 
 ---
@@ -556,7 +585,7 @@ class MyDataAdapter(private val data: List<Post>) : RecyclerView.Adapter<MyDataV
 }
 ```
 
-**MainActivity:**
+**MainActivity:** recycle view display data in a view 
 ```kotlin
 class MainActivity : AppCompatActivity() {
     private val postsList = mutableListOf<Post>(
@@ -574,9 +603,20 @@ class MainActivity : AppCompatActivity() {
     }
 }
 ```
-
+** GridLayout manager as follows.**
+override fun onCreate(savedInstanceState: Bundle?) {
+ super.onCreate(savedInstanceState)
+ setContentView(R.layout.activity_main)
+ val rvList:RecyclerView = findViewById(R.id.rvList)
+ //rvList.layoutManager = LinearLayoutManager(this,LinearLayoutManager.HORIZONTAL,false)
+ rvList.layoutManager = GridLayoutManager(this,2,
+ GridLayoutManager.VERTICAL,false)
+ val adapter = MyDataAdapter(postsList)
+ rvList.adapter = adapter
+ }
 ---
 
+---
 ### Tutorial 07: ViewModel and Intents
 
 **ViewModel:**
@@ -616,6 +656,8 @@ class MainActivity : AppCompatActivity() {
 }
 ```
 
+Explicit intents specify the target component by name, while implicit intents declare a general action allowing another app's component to handle it.
+
 **Explicit Intent:**
 ```kotlin
 button.setOnClickListener {
@@ -631,10 +673,32 @@ button.setOnClickListener {
     startActivity(intent)
 }
 ```
-
+**For this you need to implement object from Activity Launcher on class level as follows:**
+val thumbnailLauncer = registerForActivityResult(
+ ActivityResultContracts.StartActivityForResult()
+) {
+ if (it.resultCode == RESULT_OK){
+ val data = it.data
+ val imageBitmap = data?.extras?.get("data") as? Bitmap
+ imageView.setImageBitmap(imageBitmap)
+ }
+}
+**Now implement the button7 code as follows:**
+button7.setOnClickListener {
+ val intent = Intent()
+ intent.action = MediaStore.ACTION_IMAGE_CAPTURE
+ thumbnailLauncer.launch(intent)
+}
 ---
 
 ### Tutorial 08: Fragments
+
+Advantages of Using Fragments:
+• Reusability: You can use the same fragment in multiple activities.
+• Adaptability: With fragments, you can create more flexible and dynamic UIs that can adapt to 
+different device configurations
+
+FrameLayout is a layout manager in Android used to display a single item or stack multiple child views on top of each other, often utilized for simple layouts and overlay effects.
 
 **Fragment Layout (fragment_home.xml):**
 ```xml
@@ -696,6 +760,16 @@ class MainActivity : AppCompatActivity() {
 ---
 
 ### Tutorial 09: Kotlin Coroutines
+
+- **Coroutines:** Lightweight threads launched with builders like `launch` or `async`, ideal for long-running or CPU-bound tasks without blocking the main thread.
+- **Suspending Functions:** Functions with the `suspend` modifier that can be paused and resumed later, callable only from another suspending function or within a coroutine.
+- **CoroutineScope:** Interface defining a scope for new coroutines, where every coroutine builder inherits its coroutine context.
+- **Dispatchers:** Determine the thread on which the coroutine will run, including options like `Dispatchers.Main`, `Dispatchers.IO`, and `Dispatchers.Default`.
+- **Jobs and Deferred:** Jobs are cancellable entities with a lifecycle, similar to Future but with a different API. Deferred represents a non-blocking cancelable future, essentially a Job with a result.
+- **Simplicity:** Allows writing asynchronous code similar to synchronous code, enhancing readability and comprehension.
+- **Efficiency:** Reduces overhead by eliminating the need for context switching on the thread scheduler.
+- **Flexibility:** Enables developers to decide where coroutines should run, such as the main thread or background, using dispatchers.
+- **Usage:** Widely employed for network API calls, database transactions, file I/O operations, and any other tasks that could potentially block the main thread.
 
 **Coroutine Example:**
 ```kotlin
@@ -791,7 +865,18 @@ datePicker.init(2024, 5, 28) { view, year, monthOfYear, dayOfMonth ->
     Toast.makeText(this, "Selected date: $selectedDate", Toast.LENGTH_SHORT).show()
 }
 ```
+**Best practices when writing unit tests**
 
+Keep tests focused on a single functionality to pinpoint failures easily.
+Use test doubles (mocks, stubs, fakes) to isolate code and identify specific component issues.
+Utilize descriptive test names for clarity and quick issue identification.
+Test edge cases (empty input, extreme values) to ensure comprehensive code coverage.
+
+**Best Practices when using Instrumented Testing**
+Keep test code separate from the app code for organization and clarity.
+Ensure the use of the latest Android Studio version for updated features.
+Employ AndroidX Test library for optimized testing APIs.
+Select appropriate testing frameworks: JUnit for unit tests, Espresso for UI tests.
 
 ---
 
