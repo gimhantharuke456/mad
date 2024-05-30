@@ -142,30 +142,36 @@
 2. **Entity:**
    ```kotlin
    @Entity
-   data class User(
-       @PrimaryKey val uid: Int,
-       @ColumnInfo(name = "first_name") val firstName: String?,
-       @ColumnInfo(name = "last_name") val lastName: String?
+   data class Course(
+       @PrimaryKey val courseId: String,
+       val courseName: String,
+       val credits: Int
    )
    ```
 
 3. **DAO:**
    ```kotlin
    @Dao
-   interface UserDao {
-       @Query("SELECT * FROM user")
-       fun getAll(): List<User>
-
+   interface CourseDao {
        @Insert
-       fun insertAll(vararg users: User)
+       fun insertCourse(course: Course)
+
+       @Update
+       fun updateCourse(course: Course)
+
+       @Delete
+       fun deleteCourse(course: Course)
+
+       @Query("SELECT * FROM Course")
+       fun getAllCourses(): List<Course>
    }
    ```
 
 4. **Database:**
    ```kotlin
-   @Database(entities = [User::class], version = 1)
+   @Database(entities = [Course::class], version = 1)
    abstract class AppDatabase : RoomDatabase() {
-       abstract fun userDao(): UserDao
+       abstract fun courseDao(): CourseDao
    }
    ```
 
@@ -173,7 +179,7 @@
    ```kotlin
    val db = Room.databaseBuilder(
        applicationContext,
-       AppDatabase::class.java, "database-name"
+       AppDatabase::class.java, "course-database"
    ).build()
    ```
 
@@ -207,56 +213,584 @@ class MyForegroundService : Service() {
 
 ---
 
-### **Creating Tables in SQL**
-```sql
-CREATE TABLE User (
-    id INTEGER PRIMARY KEY,
-    firstName TEXT,
-    lastName TEXT
-);
+### **Button Click Handling**
+```kotlin
+val myButton: Button = findViewById(R.id.myButton)
+myButton.setOnClickListener {
+    // Handle button click
+    Toast.makeText(this, "Button clicked!", Toast.LENGTH_SHORT).show()
+}
+```
+
+### **Date Picker Handling**
+```kotlin
+val datePicker = findViewById<DatePicker>(R.id.datePicker)
+datePicker.init(year, month, day) { view, year, monthOfYear, dayOfMonth ->
+    val selectedDate = "$dayOfMonth/${monthOfYear + 1}/$year"
+    Toast.makeText(this, "Selected date: $selectedDate", Toast.LENGTH_SHORT).show()
+}
 ```
 
 ---
 
-### **Example Code Snippets**
+### **Exam Sample Question Solution**
 
-**ViewModel Usage in Activity:**
+**a) Course Entity**
 ```kotlin
-val model = ViewModelProvider(this).get(MainActivityViewModel::class.java)
-model.data.observe(this, Observer { data ->
-    // Update UI
-})
+@Entity(tableName = "course_table")
+data class Course(
+    @PrimaryKey(autoGenerate = true) val id: Int = 0,
+    @ColumnInfo(name = "course_id") val courseId: String,
+    @ColumnInfo(name = "course_name") val courseName: String,
+    @ColumnInfo(name = "credits") val credits: Int
+)
 ```
 
-**Data Model Class:**
+**b) Course DAO**
 ```kotlin
-data class User(val id: Int, val name: String, val age: Int)
+@Dao
+interface CourseDao {
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    suspend fun insert(course: Course)
+
+    @Update
+    suspend fun update(course: Course)
+
+    @Delete
+    suspend fun delete(course: Course)
+
+    @Query("SELECT * FROM course_table ORDER BY course_name ASC")
+    fun getAllCourses(): LiveData<List<Course>>
+}
 ```
 
-**RecyclerView Item Layout (item_layout.xml):**
+**c) Lifecycle-Aware Components and Room Database Interaction**
+- **ViewModel**: ViewModel interacts with the Room database and stores UI-related data. This data survives configuration changes.
+- **LiveData**: Used within ViewModel to observe data changes. When data in the database changes, LiveData updates the UI components.
+- **Repository**: Acts as a mediator between ViewModel and Room database. It handles data operations and abstracts the data source from ViewModel.
+
+```kotlin
+class CourseViewModel(application: Application) : AndroidViewModel(application) {
+    private val repository: CourseRepository
+    val allCourses: LiveData<List<Course>>
+
+    init {
+        val courseDao = AppDatabase.getDatabase(application).courseDao()
+        repository = CourseRepository(courseDao)
+        allCourses = repository.allCourses
+    }
+
+    fun insert(course: Course) = viewModelScope.launch {
+        repository.insert(course)
+    }
+
+    fun update(course: Course) = viewModelScope.launch {
+        repository.update(course)
+    }
+
+    fun delete(course: Course) = viewModelScope.launch {
+        repository.delete(course)
+    }
+}
+```
+
+### Mobile Application Development Short Note with Code Examples
+
+---
+
+### Tutorial 01: Kotlin Basics
+
+**Variables and Data Types:**
+```kotlin
+val myVal: Int = 10 // Immutable variable
+var myVar: String = "Hello" // Mutable variable
+```
+
+**Functions:**
+```kotlin
+fun calculateCircumference(radius: Double): Double {
+    return 2 * Math.PI * radius
+}
+```
+
+**Conditions and Loops:**
+```kotlin
+fun determineGrade(mark: Int): String {
+    return when {
+        mark >= 75 -> "A"
+        mark >= 65 -> "B"
+        mark >= 50 -> "C"
+        mark >= 35 -> "D"
+        else -> "F"
+    }
+}
+
+for (i in 1..10) {
+    println(i)
+}
+```
+
+**Collections:**
+```kotlin
+val list = listOf(1, 2, 3)
+val mutableList = mutableListOf(1, 2, 3)
+```
+
+---
+
+### Tutorial 03: Simple Calculator
+
+**activity_main.xml:**
 ```xml
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:orientation="horizontal">
-
-    <TextView
-        android:id="@+id/textView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:padding="16dp"/>
+<LinearLayout ...>
+    <EditText android:id="@+id/edtNumber1" ... />
+    <EditText android:id="@+id/edtNumber2" ... />
+    <Button android:id="@+id/btnPlus" ... />
+    <!-- Other buttons -->
 </LinearLayout>
 ```
 
+**Calculator Class:**
+```kotlin
+class Calculator(private val number1: Double, private val number2: Double) {
+    fun add() = number1 + number2
+    fun subtract() = number1 - number2
+    fun multiply() = number1 * number2
+    fun divide() = number1 / number2
+}
+```
+
+**MainActivity:**
+```kotlin
+class MainActivity : AppCompatActivity() {
+    lateinit var edtNumber1: EditText
+    lateinit var edtNumber2: EditText
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
+
+        edtNumber1 = findViewById(R.id.edtNumber1)
+        edtNumber2 = findViewById(R.id.edtNumber2)
+    }
+
+    fun buttonClick(v: View) {
+        val number1 = edtNumber1.text.toString().toDouble()
+        val number2 = edtNumber2.text.toString().toDouble()
+        val calculator = Calculator(number1, number2)
+        val result = when (v.id) {
+            R.id.btnPlus -> calculator.add()
+            R.id.btnMinus -> calculator.subtract()
+            R.id.btnMultiply -> calculator.multiply()
+            R.id.btnDivide -> calculator.divide()
+            else -> 0.0
+        }
+        println(result) // This will print the output on the terminal
+    }
+}
+```
+
+**Navigation to DisplayActivity:**
+```kotlin
+val intent = Intent(this, DisplayActivity::class.java)
+intent.putExtra("answer", ans)
+startActivity(intent)
+```
+
 ---
 
-### **Exam Tips**
-- **Understand the lifecycle of activities and fragments.**
-- **Practice writing concise Kotlin code.**
-- **Be familiar with Room database setup and usage.**
-- **Understand how to implement RecyclerView for lists.**
-- **Know the difference and use cases of various types of Intents and Services.**
+### Tutorial 05: Form Validation
+
+**UI Elements in XML:**
+```xml
+<LinearLayout ...>
+    <EditText android:id="@+id/edtStudentId" ... />
+    <Spinner android:id="@+id/spnYear" ... />
+    <!-- Other UI elements -->
+</LinearLayout>
+```
+
+**ValidationResult Class:**
+```kotlin
+sealed class ValidationResult {
+    data class Empty(val errorMessage: String): ValidationResult()
+    data class Invalid(val errorMessage: String): ValidationResult()
+    object Valid : ValidationResult()
+}
+```
+
+**FormData Class:**
+```kotlin
+class FormData(
+    private var studentID: String,
+    private var year: String,
+    private var semester: String,
+    private var agree: Boolean
+) {
+    fun validateStudentId(): ValidationResult {
+        return if (studentID.isEmpty()) {
+            ValidationResult.Empty("Student ID is empty")
+        } else if (!studentID.startsWith("IT")) {
+            ValidationResult.Invalid("Should be starting with IT")
+        } else if (studentID.length != 10) {
+            ValidationResult.Invalid("Student ID should have 10 characters")
+        } else {
+            ValidationResult.Valid
+        }
+    }
+
+    fun validateYear(): ValidationResult {
+        return if (year.isEmpty()) {
+            ValidationResult.Empty("Year is empty")
+        } else {
+            ValidationResult.Valid
+        }
+    }
+
+    fun validateSemester(): ValidationResult {
+        return if (semester.isEmpty()) {
+            ValidationResult.Empty("Semester is empty")
+        } else {
+            ValidationResult.Valid
+        }
+    }
+
+    fun validateAgreement(): ValidationResult {
+        return if (!agree) {
+            ValidationResult.Invalid("You must agree to the terms and conditions")
+        } else {
+            ValidationResult.Valid
+        }
+    }
+}
+```
+
+**MainActivity Validation Logic:**
+```kotlin
+lateinit var edtStudentId: EditText
+lateinit var spnYear: Spinner
+lateinit var spnSemester: Spinner
+lateinit var cbAgree: CheckBox
+
+override fun onCreate(savedInstanceState: Bundle?) {
+    super.onCreate(savedInstanceState)
+    setContentView(R.layout.activity_main)
+
+    edtStudentId = findViewById(R.id.edtStudentId)
+    spnYear = findViewById(R.id.spnYear)
+    spnSemester = findViewById(R.id.spnSemester)
+    cbAgree = findViewById(R.id.cbAgree)
+}
+
+fun submit(v: View) {
+    val myForm = FormData(
+        edtStudentId.text.toString(),
+        spnYear.selectedItem.toString(),
+        spnSemester.selectedItem.toString(),
+        cbAgree.isChecked
+    )
+
+    val studentIdValidation = myForm.validateStudentId()
+    val spnYearValidation = myForm.validateYear()
+    val spnSemesterValidation = myForm.validateSemester()
+    val cbAgreeValidation = myForm.validateAgreement()
+
+    when (studentIdValidation) {
+        is ValidationResult.Valid -> {}
+        is ValidationResult.Invalid -> edtStudentId.error = studentIdValidation.errorMessage
+        is ValidationResult.Empty -> edtStudentId.error = studentIdValidation.errorMessage
+    }
+
+    // Similar validation for year, semester, and agreement
+}
+```
 
 ---
 
-Keep this cheat sheet handy to quickly reference key concepts and code snippets during your exam. Good luck!
+### Tutorial 06: RecyclerView
+
+**Dependencies:**
+```gradle
+implementation 'androidx.recyclerview:recyclerview:1.3.1'
+```
+
+**Item Layout (item_layout.xml):**
+```xml
+<LinearLayout ...>
+    <TextView android:id="@+id/tvUserName" ... />
+    <TextView android:id="@+id/tvDescription" ... />
+    <Button android:id="@+id/btnLike" ... />
+</LinearLayout>
+```
+
+**Data Class:**
+```kotlin
+data class Post(val userName: String, val description: String, val likes: Int)
+```
+
+**ViewHolder:**
+```kotlin
+class MyDataVH(itemView: View) : RecyclerView.ViewHolder(itemView) {
+    val tvUserName: TextView = itemView.findViewById(R.id.tvUserName)
+    val tvDescription: TextView = itemView.findViewById(R.id.tvDescription)
+    val btnLike: Button = itemView.findViewById(R.id.btnLike)
+}
+```
+
+**Adapter:**
+```kotlin
+class MyDataAdapter(private val data: List<Post>) : RecyclerView.Adapter<MyDataVH>() {
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MyDataVH {
+        val view = LayoutInflater.from(parent.context).inflate(R.layout.item_layout, parent, false)
+        return MyDataVH(view)
+    }
+
+    override fun getItemCount() = data.size
+
+    override fun onBindViewHolder(holder: MyDataVH, position: Int) {
+        val post = data[position]
+        holder.tvUserName.text = post.userName
+        holder.tvDescription.text = post.description
+        holder.btnLike.text = "${post.likes} Likes"
+    }
+}
+```
+
+**MainActivity:**
+```kotlin
+class MainActivity : AppCompatActivity() {
+    private val postsList = mutableListOf<Post>(
+        Post("User1", "Description1", 10),
+        Post("User2", "Description2", 20)
+    )
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
+
+        val recyclerView: RecyclerView = findViewById(R.id.recyclerView)
+        recyclerView.layoutManager = LinearLayoutManager(this)
+        recyclerView.adapter = MyDataAdapter(postsList)
+    }
+}
+```
+
+---
+
+### Tutorial 07: ViewModel and Intents
+
+**ViewModel:**
+```kotlin
+class MainActivityData : ViewModel() {
+    private val _count = MutableLiveData<Int>().apply { value = 0 }
+    val count: LiveData<Int> = _count
+
+    fun increment() {
+        _count.value = _count.value!! + 1
+    }
+}
+```
+
+**Using ViewModel in Activity:**
+```kotlin
+class MainActivity : AppCompatActivity() {
+    private lateinit var viewModel: MainActivityData
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
+
+        viewModel = ViewModelProvider(this).get(MainActivityData::class.java)
+        val textView: TextView = findViewById(R.id.textView)
+        val button: Button = find```kotlin
+        val button: Button = findViewById(R.id.button)
+
+        viewModel.count.observe(this, Observer {
+            textView.text = it.toString()
+        })
+
+        button.setOnClickListener {
+            viewModel.increment()
+        }
+    }
+}
+```
+
+**Explicit Intent:**
+```kotlin
+button.setOnClickListener {
+    val intent = Intent(this, TargetActivity::class.java)
+    startActivity(intent)
+}
+```
+
+**Implicit Intent:**
+```kotlin
+button.setOnClickListener {
+    val intent = Intent(Intent.ACTION_VIEW, Uri.parse("http://www.example.com"))
+    startActivity(intent)
+}
+```
+
+---
+
+### Tutorial 08: Fragments
+
+**Fragment Layout (fragment_home.xml):**
+```xml
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <TextView android:id="@+id/textView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Hello Fragment" />
+</FrameLayout>
+```
+
+**HomeFragment:**
+```kotlin
+class HomeFragment : Fragment() {
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        return inflater.inflate(R.layout.fragment_home, container, false)
+    }
+}
+```
+
+**MainActivity:**
+```kotlin
+class MainActivity : AppCompatActivity() {
+    private val homeFragment = HomeFragment()
+    private val settingsFragment = SettingsFragment()
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
+
+        supportFragmentManager.beginTransaction()
+            .add(R.id.fragmentContainer, homeFragment)
+            .commit()
+
+        val button: Button = findViewById(R.id.button)
+        val button2: Button = findViewById(R.id.button2)
+
+        button.setOnClickListener {
+            supportFragmentManager.beginTransaction()
+                .replace(R.id.fragmentContainer, homeFragment)
+                .commit()
+        }
+
+        button2.setOnClickListener {
+            supportFragmentManager.beginTransaction()
+                .replace(R.id.fragmentContainer, settingsFragment)
+                .commit()
+        }
+    }
+}
+```
+
+---
+
+### Tutorial 09: Kotlin Coroutines
+
+**Coroutine Example:**
+```kotlin
+class MainActivity : AppCompatActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
+
+        val textView: TextView = findViewById(R.id.textView)
+        CoroutineScope(Dispatchers.Main).launch {
+            counter(textView)
+        }
+    }
+
+    private suspend fun counter(view: TextView) {
+        var count = 0
+        while (true) {
+            delay(1000)
+            view.text = count.toString()
+            count++
+        }
+    }
+}
+```
+
+**Button Click with Coroutine Delay:**
+```kotlin
+button.setOnClickListener {
+    Toast.makeText(this, "Hello, World!", Toast.LENGTH_LONG).show()
+    runBlocking {
+        delay(3000)
+    }
+}
+```
+
+---
+
+### Tutorial 11: Mobile App Testing
+
+**Unit Test Example:**
+```kotlin
+class Calculations(private val number1: Int, private val number2: Int) {
+    fun addition() = number1 + number2
+    fun subtraction() = number1 - number2
+    fun multiplication() = number1 * number2
+    fun division() = number1 / number2
+}
+
+class ExampleUnitTest {
+    val calculations = Calculations(4, 5)
+
+    @Test
+    fun addition_isCorrect() {
+        assertEquals(9, calculations.addition())
+    }
+
+    @Test
+    fun subtraction_isCorrect() {
+        assertEquals(-1, calculations.subtraction())
+    }
+
+    @Test
+    fun multiplication_isCorrect() {
+        assertEquals(20, calculations.multiplication())
+    }
+
+    @Test
+    fun division_isCorrect() {
+        assertEquals(0, calculations.division())
+    }
+}
+```
+
+---
+
+### Button Click Handling
+
+**Button Click Example:**
+```kotlin
+val myButton: Button = findViewById(R.id.myButton)
+myButton.setOnClickListener {
+    Toast.makeText(this, "Button clicked!", Toast.LENGTH_SHORT).show()
+}
+```
+
+### Date Picker Handling
+
+**Date Picker Example:**
+```kotlin
+val datePicker = findViewById<DatePicker>(R.id.datePicker)
+datePicker.init(2024, 5, 28) { view, year, monthOfYear, dayOfMonth ->
+    val selectedDate = "$dayOfMonth/${monthOfYear + 1}/$year"
+    Toast.makeText(this, "Selected date: $selectedDate", Toast.LENGTH_SHORT).show()
+}
+```
+
+---
+
