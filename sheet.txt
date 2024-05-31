@@ -887,8 +887,6 @@ Employ AndroidX Test library for optimized testing APIs.
 Select appropriate testing frameworks: JUnit for unit tests, Espresso for UI tests.
 
 ---
-Type Inference - Automatically determines data types
- Null safety - Prevents null reference exceptions
 ---
 Construct 2 entity data classes
 data class User(
