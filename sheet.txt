@@ -887,4 +887,50 @@ Employ AndroidX Test library for optimized testing APIs.
 Select appropriate testing frameworks: JUnit for unit tests, Espresso for UI tests.
 
 ---
+Type Inference - Automatically determines data types
+ Null safety - Prevents null reference exceptions
+---
+Construct 2 entity data classes
+data class User(
+    val userId: Int,
+    val name: String,
+    val email: String,
+    val password: String,
+    val userType: String // "admin" or "customer"
+)
+
+data class Drink(
+    val drinkId: Int,
+    val name: String, 
+    val description: String,
+    val price: Double,
+    val imageUrl: String?
+)
+
+---
+
+Activity layouts:
+
+*RegisterActivity
+
+TextView (title)
+EditText (name)
+EditText (email)
+EditText (password)
+RadioGroup (userType)
+RadioButton (admin)
+RadioButton (customer)
+Button (register)
+
+*AdminHomeActivity
+
+TextView (welcome message)
+RecyclerView (drink list)
+Button (add drink)
+Button (view feedback)
+---
+*Navigation:
+After registration, navigate to respective home activity (AdminHomeActivity or CustomerHomeActivity)
+In home activities, click "Add Drink" to show add drink dialog
+---
 
