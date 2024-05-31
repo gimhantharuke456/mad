@@ -932,3 +932,151 @@ After registration, navigate to respective home activity (AdminHomeActivity or C
 In home activities, click "Add Drink" to show add drink dialog
 ---
 
+What does mobile application development mean?
+ - Mobile application development means creating apps for devices such as tablets, 
+smartphones, automobiles, and smartwatches.
+2. **Fill in the Blank:** The mobile app offers a more ______ user experience.
+ - enchanted
+3. **Short Answer:** Why do we use Kotlin for mobile app development?
+ - Kotlin is used because it is modern, concise, safe, interoperable with Java, supports 
+structured concurrency, and is easy to learn.
+4. **Fill in the Blank:** The mobile app provides ______ functionality.
+ - offline
+5. **Short Answer:** What is a Native mobile application?
+ - A native mobile application is developed using platform-specific development tools for 
+Android, iOS, or Windows.
+6. **Fill in the Blank:** Cross-platform mobile applications help to ______ cost.
+ - control
+7. **Short Answer:** What are the benefits of using Room in mobile app development?
+ - Benefits include compile-time verification of SQL queries and streamlined database 
+migration paths.
+8. **Fill in the Blank:** Firebase is a comprehensive mobile development platform 
+providing tools and services such as ______ and ______.
+ - real-time cloud database, user authentication
+9. **Short Answer:** What is data persistence in mobile app development?
+ - Data persistence is the ability to store data locally even after the app is closed or the 
+device is turned off.
+10. **Fill in the Blank:** ______ sensors measure acceleration forces and rotational forces.
+ - Motion
+### Moderate Questions:
+11. **Short Answer:** Why do mobile apps fail?
+ - Mobile apps fail due to lack of market demand, poor performance, bad user interface, 
+limited functionality, and difficulty adjusting to a mobile screen.
+12. **Fill in the Blank:** Hybrid app development allows for ______ sharing.
+ - code
+13. **Short Answer:** What are the fundamentals of mobile applications development?
+ - Fundamentals include choice of technology, clear recognition of requirements, 
+dynamic functionality (GPS, sensors), security and speed, testing quality, and introducing a 
+pilot version.
+14. **Fill in the Blank:** UI stands for ______ and UX stands for ______.
+ - User Interface, User Experience
+15. **Short Answer:** What are the advantages of using cross-platform mobile 
+applications?
+ - Advantages include code reusability, cost control, low development time, easier 
+implementation, and uniformity across platforms.
+16. **Fill in the Blank:** Android platform architecture includes layers such as Linux kernel, 
+______, app framework, and applications.
+ - libraries
+17. **Short Answer:** What is the difference between Dalvik and ART?
+ - Dalvik uses Just-In-Time (JIT) compilation, while ART uses Ahead-Of-Time (AOT) 
+compilation. ART is faster and requires more storage space.
+18. **Fill in the Blank:** An Activity Manager interacts with activities, services, and the 
+______ process.
+ - containing
+19. **Short Answer:** What are the types of Android services?
+ - The types include started services and bound services.
+20. **Fill in the Blank:** A ______ receiver listens for system-wide broadcast messages, 
+while a ______ receiver listens for app-specific broadcast messages.
+ - static broadcast, dynamic broadcast
+21. **Short Answer:** What are some examples of broadcast receivers in Android?
+ - Examples include battery level receiver, network connectivity receiver, SMS receiver, 
+and power state receiver.
+22. **Fill in the Blank:** Content providers allow apps to ______ data with others.
+ - share
+23. **Short Answer:** What are the categories of sensors in mobile devices?
+ - Categories include motion sensors, environment sensors, and position sensors.
+24. **Fill in the Blank:** A sensor that measures ambient air temperature and pressure is 
+categorized under ______ sensors.
+ - environment
+25. **Short Answer:** Why is mobile application testing needed?
+ - Mobile application testing is needed because the end user's device can vary widely in 
+terms of hardware, screen size, resolution, and operating system.
+### Hard Questions:
+26. **Short Answer:** What should be done before a mobile app’s first release?
+ - Before the first release, research on OS and devices, set up a test bed, create a test 
+plan, select automation tools, and define testing techniques or methods.
+27. **Fill in the Blank:** Performance testing ensures that an application performs tasks 
+quickly and ______.
+ - efficiently
+28. **Short Answer:** What are the best practices in Android app testing?
+ - Best practices include careful device selection, comprehensive application testing, 
+connectivity testing, and choosing between manual and automated testing.
+29. **Fill in the Blank:** The Android runtime includes core libraries and the ______ Virtual 
+Machine.
+ - Dalvik
+30. **Short Answer:** What is the significance of UI and UX in mobile application 
+development?
+ - UI involves the visual and interactive design, while UX focuses on enhancing user 
+satisfaction by meeting user needs and improving the overall experience.
+31. **Fill in the Blank:** An object used to request an action from another app component 
+is known as an ______.
+ - intent
+32. **Short Answer:** Describe the life cycle of a service in Android.
+ - The service life cycle involves starting the service, running in the background, and 
+stopping the service when it's no longer needed.
+33. **Fill in the Blank:** ______ is a fundamental component that allows apps to share data 
+with others.
+ - Content providers
+34. **Short Answer:** What are the best practices for using sensors in mobile 
+applications?
+ - Best practices include using appropriate sensors, minimizing sensor usage, testing on 
+multiple devices, and respecting user privacy.
+35. **Fill in the Blank:** The ______ compilation method is used by ART, while Dalvik uses 
+______ compilation.
+ - AOT, JIT
+36. **Short Answer:** What are the testing types for mobile apps?
+ - Testing types include functional testing, UI testing, compatibility testing, interface 
+testing, network testing, performance testing, installation testing, security testing, field 
+testing, and interrupt testing.
+37. **Fill in the Blank:** In the context of testing, a ______ is a configuration designed for 
+execution or performance testing.
+ - test bed
+38. **Short Answer:** What are the features of the Android platform?
+ - Features include an attractive UI, storage, media support, messaging, multi-touch 
+capability, WiFi, and connectivity.
+39. **Fill in the Blank:** The layer of Android platform architecture that handles networks 
+and a wide range of device drivers is the ______ kernel.
+ - Linux
+40. **Short Answer:** What are the uses of Kotlin in mobile development?
+ - Uses include web development, mobile app development, server-side development, 
+and data science.
+41. **Fill in the Blank:** Kotlin can interoperate with ______ language.
+ - Java
+42. **Short Answer:** What factors should be considered before starting app 
+development?
+ - Factors include budget, choice of mobile platform, target audience, and market 
+research.
+43. **Fill in the Blank:** ______ is the process of evaluating and verifying that a software 
+product does what it is supposed to do.
+ - Software testing
+44. **Short Answer:** What is the role of an Automation tool in app testing?
+ - Automation tools help in executing pre-defined tests automatically, saving time and 
+improving testing accuracy.
+45. **Fill in the Blank:** ______ Virtual Machine is specifically designed and optimized for 
+Android.
+ - Dalvik
+46. **Short Answer:** What are some examples of mobile testing tools?
+ - Examples include Kobiton, TestProject, TestingBot, Testroid, and MonkeyRunner.
+47. **Fill in the Blank:** The ______ testing type ensures an application works under 
+different accessibility scenarios.
+ - accessibility
+48. **Short Answer:** What is the 60-30-10 rule in UI design?
+ - The 60-30-10 rule is a design principle that dictates the proportion of colors used in the 
+user interface: 60% dominant color, 30% secondary color, and 10% accent color.
+49. **Fill in the Blank:** ______ is a comprehensive mobile development platform that 
+provides tools for building high-quality apps.
+ - Firebase
+50. **Short Answer:** What are the disadvantages of using cross-platform mobile 
+applications?
+ - Disadvantages include loss of flexibility, poor user experience, and difficulty in satisfying 
+all users.
