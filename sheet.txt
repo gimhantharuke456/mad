@@ -1,1082 +1,398 @@
-### Mobile Application Development Cheat Sheet
-
----
-
-### **Kotlin for Android**
-
-**Why Kotlin?**
-- Less code, greater readability
-- Interoperability with Java
-- Safe and easy to learn
-- Supports Android Jetpack and libraries
-
-**Type Inference**
-- Automatically determines variable type.
-
-**Null Safety**
-- Prevents null pointer exceptions with `null` handling (`?` and `!!`).
-
----
-
-### **Android Project Structure**
-- **src/main/java**: Java/Kotlin source files.
-- **res/layout**: XML layout files.
-- **res/values**: XML resource files (strings, colors).
-
----
-
-### **Activity Lifecycle**
-- **onCreate()**: Initialize activity.
-- **onStart()**: Activity becomes visible.
-- **onResume()**: Activity starts interacting with the user.
-- **onPause()**: Another activity is taking focus.
-- **onStop()**: Activity no longer visible.
-- **onDestroy()**: Activity is destroyed.
-
----
-
-### **Intents**
-- **Explicit Intent**: Specific component.
-  ```kotlin
-  val intent = Intent(this, TargetActivity::class.java)
-  startActivity(intent)
-  ```
-
-- **Implicit Intent**: General action.
-  ```kotlin
-  val intent = Intent(Intent.ACTION_VIEW)
-  intent.data = Uri.parse("http://www.example.com")
-  startActivity(intent)
-  ```
-
-**Features:**
-- **Starting Activities**: `startActivity(intent)`
-- **Starting Services**: `startService(intent)`
-- **Broadcasting**: `sendBroadcast(intent)`
-
----
-
-### **Broadcast Receivers**
-- Listen for system-wide broadcast announcements.
-  ```kotlin
-  class MyReceiver : BroadcastReceiver() {
-      override fun onReceive(context: Context, intent: Intent) {
-          // Handle the broadcast
-      }
-  }
-  ```
-
----
-
-### **ViewModel**
-- Manages UI-related data lifecycle.
-  ```kotlin
-  class MainActivityViewModel : ViewModel() {
-      private val _data = MutableLiveData<String>()
-      val data: LiveData<String> = _data
-
-      fun setData(value: String) {
-          _data.value = value
-      }
-  }
-  ```
-
-**Usage:**
-  ```kotlin
-  val viewModel = ViewModelProvider(this).get(MainActivityViewModel::class.java)
-  ```
-
----
-
-### **RecyclerView**
-1. **Add Dependency:**
-   ```gradle
-   implementation 'androidx.recyclerview:recyclerview:1.3.1'
-   ```
-
-2. **Layout:**
-   ```xml
-   <androidx.recyclerview.widget.RecyclerView
-       android:id="@+id/recyclerView"
-       android:layout_width="match_parent"
-       android:layout_height="match_parent"/>
-   ```
-
-3. **Adapter:**
-   ```kotlin
-   class MyAdapter(private val dataList: List<String>) : RecyclerView.Adapter<MyAdapter.ViewHolder>() {
-       class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-           val textView: TextView = itemView.findViewById(R.id.textView)
-       }
-
-       override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-           val view = LayoutInflater.from(parent.context).inflate(R.layout.item_layout, parent, false)
-           return ViewHolder(view)
-       }
-
-       override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-           holder.textView.text = dataList[position]
-       }
-
-       override fun getItemCount() = dataList.size
-   }
-   ```
-
-4. **Activity:**
-   ```kotlin
-   val recyclerView: RecyclerView = findViewById(R.id.recyclerView)
-   recyclerView.layoutManager = LinearLayoutManager(this)
-   recyclerView.adapter = MyAdapter(myDataList)
-   ```
-
----
-
-### **Room Database**
-1. **Dependencies:**
-   ```gradle
-   implementation "androidx.room:room-runtime:2.5.0"
-   kapt "androidx.room:room-compiler:2.5.0"
-   implementation "androidx.room:room-ktx:2.5.0"
-   ```
-
-2. **Entity:**
-   ```kotlin
-   @Entity
-   data class Course(
-       @PrimaryKey val courseId: String,
-       val courseName: String,
-       val credits: Int
-   )
-   ```
-
-3. **DAO:**
-   ```kotlin
-   @Dao
-   interface CourseDao {
-       @Insert
-       fun insertCourse(course: Course)
-
-       @Update
-       fun updateCourse(course: Course)
-
-       @Delete
-       fun deleteCourse(course: Course)
-
-       @Query("SELECT * FROM Course")
-       fun getAllCourses(): List<Course>
-   }
-   ```
-
-4. **Database:**
-   ```kotlin
-   @Database(entities = [Course::class], version = 1)
-   abstract class AppDatabase : RoomDatabase() {
-       abstract fun courseDao(): CourseDao
-   }
-   ```
-
-5. **Usage:**
-   ```kotlin
-   val db = Room.databaseBuilder(
-       applicationContext,
-       AppDatabase::class.java, "course-database"
-   ).build()
-   ```
-
----
-
-### **Services**
-
-**Types:**
-- **Foreground Service**: User-visible ongoing operations (e.g., music player).
-- **Background Service**: Long-running operations in the background.
-- **Bound Service**: Allows components to bind and interact with the service.
-
-**Example Foreground Service:**
-```kotlin
-class MyForegroundService : Service() {
-    override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
-        val notification = Notification.Builder(this, CHANNEL_ID)
-            .setContentTitle("Service Running")
-            .setContentText("Service is running in the foreground")
-            .setSmallIcon(R.drawable.ic_notification)
-            .build()
-        startForeground(1, notification)
-        return START_STICKY
-    }
-
-    override fun onBind(intent: Intent): IBinder? {
-        return null
-    }
-}
-```
-
----
-
-### **Button Click Handling**
-```kotlin
-val myButton: Button = findViewById(R.id.myButton)
-myButton.setOnClickListener {
-    // Handle button click
-    Toast.makeText(this, "Button clicked!", Toast.LENGTH_SHORT).show()
-}
-```
-
-### **Date Picker Handling**
-```kotlin
-val datePicker = findViewById<DatePicker>(R.id.datePicker)
-datePicker.init(year, month, day) { view, year, monthOfYear, dayOfMonth ->
-    val selectedDate = "$dayOfMonth/${monthOfYear + 1}/$year"
-    Toast.makeText(this, "Selected date: $selectedDate", Toast.LENGTH_SHORT).show()
-}
-```
-
----
-
-### **Exam Sample Question Solution**
-
-**a) Course Entity**
-```kotlin
-@Entity(tableName = "course_table")
-data class Course(
-    @PrimaryKey(autoGenerate = true) val id: Int = 0,
-    @ColumnInfo(name = "course_id") val courseId: String,
-    @ColumnInfo(name = "course_name") val courseName: String,
-    @ColumnInfo(name = "credits") val credits: Int
-)
-```
-
-**b) Course DAO**
-```kotlin
-@Dao
-interface CourseDao {
-    @Insert(onConflict = OnConflictStrategy.IGNORE)
-    suspend fun insert(course: Course)
-
-    @Update
-    suspend fun update(course: Course)
-
-    @Delete
-    suspend fun delete(course: Course)
-
-    @Query("SELECT * FROM course_table ORDER BY course_name ASC")
-    fun getAllCourses(): LiveData<List<Course>>
-}
-```
-
-**c) Lifecycle-Aware Components and Room Database Interaction**
-- **ViewModel**: ViewModel interacts with the Room database and stores UI-related data. This data survives configuration changes.
-Lifecycle Awareness: ViewModel is designed to be lifecycle-aware, meaning it won't cause 
-memory leaks and it'll be cleared once its associated lifecycle is destroyed.
-
-- **LiveData**: Used within ViewModel to observe data changes. When data in the database changes, LiveData updates the UI components.
-- **Repository**: Acts as a mediator between ViewModel and Room database. It handles data operations and abstracts the data source from ViewModel.
-
-```kotlin
-class CourseViewModel(application: Application) : AndroidViewModel(application) {
-    private val repository: CourseRepository
-    val allCourses: LiveData<List<Course>>
-
-    init {
-        val courseDao = AppDatabase.getDatabase(application).courseDao()
-        repository = CourseRepository(courseDao)
-        allCourses = repository.allCourses
-    }
-
-    fun insert(course: Course) = viewModelScope.launch {
-        repository.insert(course)
-    }
-
-    fun update(course: Course) = viewModelScope.launch {
-        repository.update(course)
-    }
-
-    fun delete(course: Course) = viewModelScope.launch {
-        repository.delete(course)
-    }
-}
-```
-
-### Mobile Application Development Short Note with Code Examples
-
----
-
-### Tutorial 01: Kotlin Basics
-
-**Variables and Data Types:**
-```kotlin
-val myVal: Int = 10 // Immutable variable
-var myVar: String = "Hello" // Mutable variable
-```
-
-**Functions:**
-```kotlin
-fun calculateCircumference(radius: Double): Double {
-    return 2 * Math.PI * radius
-}
-```
-
-**Conditions and Loops:**
-```kotlin
-fun determineGrade(mark: Int): String {
-    return when {
-        mark >= 75 -> "A"
-        mark >= 65 -> "B"
-        mark >= 50 -> "C"
-        mark >= 35 -> "D"
-        else -> "F"
-    }
-}
-
-for (i in 1..10) {
-    println(i)
-}
-```
-
-**Collections:**
-```kotlin
-val list = listOf(1, 2, 3)
-val mutableList = mutableListOf(1, 2, 3)
-```
-
----
-
-### Tutorial 03: Simple Calculator
-
-**activity_main.xml:**
-```xml
-<LinearLayout ...>
-    <EditText android:id="@+id/edtNumber1" ... />
-    <EditText android:id="@+id/edtNumber2" ... />
-    <Button android:id="@+id/btnPlus" ... />
-    <!-- Other buttons -->
-</LinearLayout>
-```
-
-**Create Calculator Class:**
-```kotlin
-class Calculator(private val number1: Double, private val number2: Double) {
-    fun add() = number1 + number2
-    fun subtract() = number1 - number2
-    fun multiply() = number1 * number2
-    fun divide() = number1 / number2
-}
-```
-
-**MainActivity:**
-```kotlin
-class MainActivity : AppCompatActivity() {
-    lateinit var edtNumber1: EditText
-    lateinit var edtNumber2: EditText
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
-
-        edtNumber1 = findViewById(R.id.edtNumber1)
-        edtNumber2 = findViewById(R.id.edtNumber2)
-    }
-  //  Implement a function passing the view as a parameter to implement the calculation.
-    fun buttonClick(v: View) {
-        val number1 = edtNumber1.text.toString().toDouble()
-        val number2 = edtNumber2.text.toString().toDouble()
-        val calculator = Calculator(number1, number2)
-        val result = when (v.id) {
-            R.id.btnPlus -> calculator.add()
-            R.id.btnMinus -> calculator.subtract()
-            R.id.btnMultiply -> calculator.multiply()
-            R.id.btnDivide -> calculator.divide()
-            else -> 0.0
-        }
-        println(result) // This will print the output on the terminal
-    }
-}
-```
-
-**Navigation to DisplayActivity:**
-```kotlin
-val intent = Intent(this, DisplayActivity::class.java)
-intent.putExtra("answer", ans)
-startActivity(intent)
-```
-
----
-
-### Tutorial 05: Form Validation
-
-**UI Elements in XML:**
-```xml
-<LinearLayout ...>
-    <EditText android:id="@+id/edtStudentId" ... />
-    <Spinner android:id="@+id/spnYear" ... />
-    <!-- Other UI elements -->
-</LinearLayout>
-```
-
-**ValidationResult Class:**
-```kotlin
-sealed class ValidationResult {
-    data class Empty(val errorMessage: String): ValidationResult()
-    data class Invalid(val errorMessage: String): ValidationResult()
-    object Valid : ValidationResult()
-}
-```
-
-**FormData Class:**
-```kotlin
-class FormData(
-    private var studentID: String,
-    private var year: String,
-    private var semester: String,
-    private var agree: Boolean
-) {
-    fun validateStudentId(): ValidationResult {
-        return if (studentID.isEmpty()) {
-            ValidationResult.Empty("Student ID is empty")
-        } else if (!studentID.startsWith("IT")) {
-            ValidationResult.Invalid("Should be starting with IT")
-        } else if (studentID.length != 10) {
-            ValidationResult.Invalid("Student ID should have 10 characters")
-        } else {
-            ValidationResult.Valid
-        }
-    }
-
-    fun validateYear(): ValidationResult {
-        return if (year.isEmpty()) {
-            ValidationResult.Empty("Year is empty")
-        } else {
-            ValidationResult.Valid
-        }
-    }
-
-    fun validateSemester(): ValidationResult {
-        return if (semester.isEmpty()) {
-            ValidationResult.Empty("Semester is empty")
-        } else {
-            ValidationResult.Valid
-        }
-    }
-
-    fun validateAgreement(): ValidationResult {
-        return if (!agree) {
-            ValidationResult.Invalid("You must agree to the terms and conditions")
-        } else {
-            ValidationResult.Valid
-        }
-    }
-}
-```
-
-**MainActivity Validation Logic:**
-```kotlin
-lateinit var edtStudentId: EditText
-lateinit var spnYear: Spinner
-lateinit var spnSemester: Spinner
-lateinit var cbAgree: CheckBox
-
-override fun onCreate(savedInstanceState: Bundle?) {
-    super.onCreate(savedInstanceState)
-    setContentView(R.layout.activity_main)
-
-    edtStudentId = findViewById(R.id.edtStudentId)
-    spnYear = findViewById(R.id.spnYear)
-    spnSemester = findViewById(R.id.spnSemester)
-    cbAgree = findViewById(R.id.cbAgree)
-}
-
-**implement the displayAlert function**
-
-fun displayAlert(title:String, message:String){
- val builder = AlertDialog.Builder(this)
- builder.setTitle(title)
- builder.setMessage(message)
- builder.setPositiveButton("OK") { dialog, which ->
- // Do something when the "OK" button is clicked
- }
- val dialog = builder.create()
- dialog.show()
-}
-
-**implement the submit function**
-
-fun submit(v: View) {
-    val myForm = FormData(
-        edtStudentId.text.toString(),
-        spnYear.selectedItem.toString(),
-        spnSemester.selectedItem.toString(),
-        cbAgree.isChecked
-    )
-
-    val studentIdValidation = myForm.validateStudentId()
-    val spnYearValidation = myForm.validateYear()
-    val spnSemesterValidation = myForm.validateSemester()
-    val cbAgreeValidation = myForm.validateAgreement()
-
-    when (studentIdValidation) {
-        is ValidationResult.Valid -> {}
-        is ValidationResult.Invalid -> edtStudentId.error = studentIdValidation.errorMessage
-        is ValidationResult.Empty -> edtStudentId.error = studentIdValidation.errorMessage
-    }
-
-    // Similar validation for year, semester, and agreement
-**is ValidationResult.Empty**
-is ValidationResult.Empty ->{
-val tv: TextView = spnSemester.selectedView  as TextView
-tv.error = ""
-tv.text = spnSemesterValidation.errorMessage
-}
-
-**is ValidationResult.Invalid **
-is ValidationResult.Invalid ->{
-displayAlert("Error" , cbAgreeValidation. errorMessage)
-}
-
-```
-
----
-
-### Tutorial 06: RecyclerView
-
-**Dependencies:**
-```gradle
-implementation 'androidx.recyclerview:recyclerview:1.3.1'
-```
-
-**Item Layout (item_layout.xml):**
-```xml
-<LinearLayout ...>
-    <TextView android:id="@+id/tvUserName" ... />
-    <TextView android:id="@+id/tvDescription" ... />
-    <Button android:id="@+id/btnLike" ... />
-</LinearLayout>
-```
-
-**Data Class:**
-```kotlin
-data class Post(val userName: String, val description: String, val likes: Int)
-```
-
-**ViewHolder:**
-```kotlin
-class MyDataVH(itemView: View) : RecyclerView.ViewHolder(itemView) {
-    val tvUserName: TextView = itemView.findViewById(R.id.tvUserName)
-    val tvDescription: TextView = itemView.findViewById(R.id.tvDescription)
-    val btnLike: Button = itemView.findViewById(R.id.btnLike)
-}
-```
-
-**Adapter:**
-```kotlin
-class MyDataAdapter(private val data: List<Post>) : RecyclerView.Adapter<MyDataVH>() {
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MyDataVH {
-        val view = LayoutInflater.from(parent.context).inflate(R.layout.item_layout, parent, false)
-        return MyDataVH(view)
-    }
-
-    override fun getItemCount() = data.size
-
-    override fun onBindViewHolder(holder: MyDataVH, position: Int) {
-        val post = data[position]
-        holder.tvUserName.text = post.userName
-        holder.tvDescription.text = post.description
-        holder.btnLike.text = "${post.likes} Likes"
-    }
-}
-```
-
-**MainActivity:** recycle view display data in a view 
-```kotlin
-class MainActivity : AppCompatActivity() {
-    private val postsList = mutableListOf<Post>(
-        Post("User1", "Description1", 10),
-        Post("User2", "Description2", 20)
-    )
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
-
-        val recyclerView: RecyclerView = findViewById(R.id.recyclerView)
-        recyclerView.layoutManager = LinearLayoutManager(this)
-        recyclerView.adapter = MyDataAdapter(postsList)
-    }
-}
-```
-** GridLayout manager as follows.**
-override fun onCreate(savedInstanceState: Bundle?) {
- super.onCreate(savedInstanceState)
- setContentView(R.layout.activity_main)
- val rvList:RecyclerView = findViewById(R.id.rvList)
- //rvList.layoutManager = LinearLayoutManager(this,LinearLayoutManager.HORIZONTAL,false)
- rvList.layoutManager = GridLayoutManager(this,2,
- GridLayoutManager.VERTICAL,false)
- val adapter = MyDataAdapter(postsList)
- rvList.adapter = adapter
- }
----
-
----
-### Tutorial 07: ViewModel and Intents
-
-**ViewModel:**
-```kotlin
-class MainActivityData : ViewModel() {
-    private val _count = MutableLiveData<Int>().apply { value = 0 }
-    val count: LiveData<Int> = _count
-
-    fun increment() {
-        _count.value = _count.value!! + 1
-    }
-}
-```
-
-**Using ViewModel in Activity:**
-```kotlin
-class MainActivity : AppCompatActivity() {
-    private lateinit var viewModel: MainActivityData
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
-
-        viewModel = ViewModelProvider(this).get(MainActivityData::class.java)
-        val textView: TextView = findViewById(R.id.textView)
-        val button: Button = find```kotlin
-        val button: Button = findViewById(R.id.button)
-
-        viewModel.count.observe(this, Observer {
-            textView.text = it.toString()
-        })
-
-        button.setOnClickListener {
-            viewModel.increment()
-        }
-    }
-}
-```
-
-Explicit intents specify the target component by name, while implicit intents declare a general action allowing another app's component to handle it.
-
-**Explicit Intent:**
-```kotlin
-button.setOnClickListener {
-    val intent = Intent(this, TargetActivity::class.java)
-    startActivity(intent)
-}
-```
-
-**Implicit Intent:**
-```kotlin
-button.setOnClickListener {
-    val intent = Intent(Intent.ACTION_VIEW, Uri.parse("http://www.example.com"))
-    startActivity(intent)
-}
-```
-**For this you need to implement object from Activity Launcher on class level as follows:**
-val thumbnailLauncer = registerForActivityResult(
- ActivityResultContracts.StartActivityForResult()
-) {
- if (it.resultCode == RESULT_OK){
- val data = it.data
- val imageBitmap = data?.extras?.get("data") as? Bitmap
- imageView.setImageBitmap(imageBitmap)
- }
-}
-**Now implement the button7 code as follows:**
-button7.setOnClickListener {
- val intent = Intent()
- intent.action = MediaStore.ACTION_IMAGE_CAPTURE
- thumbnailLauncer.launch(intent)
-}
----
-
-### Tutorial 08: Fragments
-
-Advantages of Using Fragments:
-• Reusability: You can use the same fragment in multiple activities.
-• Adaptability: With fragments, you can create more flexible and dynamic UIs that can adapt to 
-different device configurations
-
-FrameLayout is a layout manager in Android used to display a single item or stack multiple child views on top of each other, often utilized for simple layouts and overlay effects.
-
-**Fragment Layout (fragment_home.xml):**
-```xml
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent">
-
-    <TextView android:id="@+id/textView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Hello Fragment" />
-</FrameLayout>
-```
-
-**HomeFragment:**
-```kotlin
-class HomeFragment : Fragment() {
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        return inflater.inflate(R.layout.fragment_home, container, false)
-    }
-}
-```
-
-**MainActivity:**
-```kotlin
-class MainActivity : AppCompatActivity() {
-    private val homeFragment = HomeFragment()
-    private val settingsFragment = SettingsFragment()
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
-
-        supportFragmentManager.beginTransaction()
-            .add(R.id.fragmentContainer, homeFragment)
-            .commit()
-
-        val button: Button = findViewById(R.id.button)
-        val button2: Button = findViewById(R.id.button2)
-
-        button.setOnClickListener {
-            supportFragmentManager.beginTransaction()
-                .replace(R.id.fragmentContainer, homeFragment)
-                .commit()
-        }
-
-        button2.setOnClickListener {
-            supportFragmentManager.beginTransaction()
-                .replace(R.id.fragmentContainer, settingsFragment)
-                .commit()
-        }
-    }
-}
-```
-
----
-
-### Tutorial 09: Kotlin Coroutines
-
-- **Coroutines:** Lightweight threads launched with builders like `launch` or `async`, ideal for long-running or CPU-bound tasks without blocking the main thread.
-- **Suspending Functions:** Functions with the `suspend` modifier that can be paused and resumed later, callable only from another suspending function or within a coroutine.
-- **CoroutineScope:** Interface defining a scope for new coroutines, where every coroutine builder inherits its coroutine context.
-- **Dispatchers:** Determine the thread on which the coroutine will run, including options like `Dispatchers.Main`, `Dispatchers.IO`, and `Dispatchers.Default`.
-- **Jobs and Deferred:** Jobs are cancellable entities with a lifecycle, similar to Future but with a different API. Deferred represents a non-blocking cancelable future, essentially a Job with a result.
-- **Simplicity:** Allows writing asynchronous code similar to synchronous code, enhancing readability and comprehension.
-- **Efficiency:** Reduces overhead by eliminating the need for context switching on the thread scheduler.
-- **Flexibility:** Enables developers to decide where coroutines should run, such as the main thread or background, using dispatchers.
-- **Usage:** Widely employed for network API calls, database transactions, file I/O operations, and any other tasks that could potentially block the main thread.
-
-- **CoroutineScope:** Manages coroutine lifecycle and provides a context for coroutine execution.
-- **Cancellation:** Cancelling a CoroutineScope cancels all coroutines launched within it.
-- **Dispatchers:** Class providing thread pools and contexts for coroutine execution.
-- **Dispatchers.Default:** Used for CPU-intensive tasks, creates threads matching CPU cores.
-- **Dispatchers.IO:** Optimized for IO-bound tasks, like file operations or network requests.
-- **Dispatchers.Main:** Executes operations on the UI thread, suitable for UI updates.
-- **Dispatchers.Unconfined:** For coroutines without a specific thread context, can run on any thread.
-
-**Coroutine Example:**
-```kotlin
-class MainActivity : AppCompatActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
-
-        val textView: TextView = findViewById(R.id.textView)
-        CoroutineScope(Dispatchers.Main).launch {
-            counter(textView)
-        }
-    }
-
-    private suspend fun counter(view: TextView) {
-        var count = 0
-        while (true) {
-            delay(1000)
-            view.text = count.toString()
-            count++
-        }
-    }
-}
-```
-
-**Button Click with Coroutine Delay:**
-```kotlin
-button.setOnClickListener {
-    Toast.makeText(this, "Hello, World!", Toast.LENGTH_LONG).show()
-    runBlocking {
-        delay(3000)
-    }
-}
-```
-
----
-
-### Tutorial 11: Mobile App Testing
-
-**Unit Test Example:**
-```kotlin
-class Calculations(private val number1: Int, private val number2: Int) {
-    fun addition() = number1 + number2
-    fun subtraction() = number1 - number2
-    fun multiplication() = number1 * number2
-    fun division() = number1 / number2
-}
-
-class ExampleUnitTest {
-    val calculations = Calculations(4, 5)
-
-    @Test
-    fun addition_isCorrect() {
-        assertEquals(9, calculations.addition())
-    }
-
-    @Test
-    fun subtraction_isCorrect() {
-        assertEquals(-1, calculations.subtraction())
-    }
-
-    @Test
-    fun multiplication_isCorrect() {
-        assertEquals(20, calculations.multiplication())
-    }
-
-    @Test
-    fun division_isCorrect() {
-        assertEquals(0, calculations.division())
-    }
-}
-```
-
----
-
-### Button Click Handling
-
-**Button Click Example:**
-```kotlin
-val myButton: Button = findViewById(R.id.myButton)
-myButton.setOnClickListener {
-    Toast.makeText(this, "Button clicked!", Toast.LENGTH_SHORT).show()
-}
-```
-
-### Date Picker Handling
-
-**Date Picker Example:**
-```kotlin
-val datePicker = findViewById<DatePicker>(R.id.datePicker)
-datePicker.init(2024, 5, 28) { view, year, monthOfYear, dayOfMonth ->
-    val selectedDate = "$dayOfMonth/${monthOfYear + 1}/$year"
-    Toast.makeText(this, "Selected date: $selectedDate", Toast.LENGTH_SHORT).show()
-}
-```
-**Best practices when writing unit tests**
-
-Keep tests focused on a single functionality to pinpoint failures easily.
-Use test doubles (mocks, stubs, fakes) to isolate code and identify specific component issues.
-Utilize descriptive test names for clarity and quick issue identification.
-Test edge cases (empty input, extreme values) to ensure comprehensive code coverage.
-
-**Best Practices when using Instrumented Testing**
-Keep test code separate from the app code for organization and clarity.
-Ensure the use of the latest Android Studio version for updated features.
-Employ AndroidX Test library for optimized testing APIs.
-Select appropriate testing frameworks: JUnit for unit tests, Espresso for UI tests.
-
----
----
-Construct 2 entity data classes
-data class User(
-    val userId: Int,
-    val name: String,
-    val email: String,
-    val password: String,
-    val userType: String // "admin" or "customer"
-)
-
-data class Drink(
-    val drinkId: Int,
-    val name: String, 
-    val description: String,
-    val price: Double,
-    val imageUrl: String?
-)
-
----
-
-Activity layouts:
-
-*RegisterActivity
-
-TextView (title)
-EditText (name)
-EditText (email)
-EditText (password)
-RadioGroup (userType)
-RadioButton (admin)
-RadioButton (customer)
-Button (register)
-
-*AdminHomeActivity
-
-TextView (welcome message)
-RecyclerView (drink list)
-Button (add drink)
-Button (view feedback)
----
-*Navigation:
-After registration, navigate to respective home activity (AdminHomeActivity or CustomerHomeActivity)
-In home activities, click "Add Drink" to show add drink dialog
----
-
-What does mobile application development mean?
- - Mobile application development means creating apps for devices such as tablets, 
-smartphones, automobiles, and smartwatches.
-2. **Fill in the Blank:** The mobile app offers a more ______ user experience.
- - enchanted
-3. **Short Answer:** Why do we use Kotlin for mobile app development?
- - Kotlin is used because it is modern, concise, safe, interoperable with Java, supports 
-structured concurrency, and is easy to learn.
-4. **Fill in the Blank:** The mobile app provides ______ functionality.
- - offline
-5. **Short Answer:** What is a Native mobile application?
- - A native mobile application is developed using platform-specific development tools for 
-Android, iOS, or Windows.
-6. **Fill in the Blank:** Cross-platform mobile applications help to ______ cost.
- - control
-7. **Short Answer:** What are the benefits of using Room in mobile app development?
- - Benefits include compile-time verification of SQL queries and streamlined database 
-migration paths.
-8. **Fill in the Blank:** Firebase is a comprehensive mobile development platform 
-providing tools and services such as ______ and ______.
- - real-time cloud database, user authentication
-9. **Short Answer:** What is data persistence in mobile app development?
- - Data persistence is the ability to store data locally even after the app is closed or the 
-device is turned off.
-10. **Fill in the Blank:** ______ sensors measure acceleration forces and rotational forces.
- - Motion
-### Moderate Questions:
-11. **Short Answer:** Why do mobile apps fail?
- - Mobile apps fail due to lack of market demand, poor performance, bad user interface, 
-limited functionality, and difficulty adjusting to a mobile screen.
-12. **Fill in the Blank:** Hybrid app development allows for ______ sharing.
- - code
-13. **Short Answer:** What are the fundamentals of mobile applications development?
- - Fundamentals include choice of technology, clear recognition of requirements, 
-dynamic functionality (GPS, sensors), security and speed, testing quality, and introducing a 
-pilot version.
-14. **Fill in the Blank:** UI stands for ______ and UX stands for ______.
- - User Interface, User Experience
-15. **Short Answer:** What are the advantages of using cross-platform mobile 
-applications?
- - Advantages include code reusability, cost control, low development time, easier 
-implementation, and uniformity across platforms.
-16. **Fill in the Blank:** Android platform architecture includes layers such as Linux kernel, 
-______, app framework, and applications.
- - libraries
-17. **Short Answer:** What is the difference between Dalvik and ART?
- - Dalvik uses Just-In-Time (JIT) compilation, while ART uses Ahead-Of-Time (AOT) 
-compilation. ART is faster and requires more storage space.
-18. **Fill in the Blank:** An Activity Manager interacts with activities, services, and the 
-______ process.
- - containing
-19. **Short Answer:** What are the types of Android services?
- - The types include started services and bound services.
-20. **Fill in the Blank:** A ______ receiver listens for system-wide broadcast messages, 
-while a ______ receiver listens for app-specific broadcast messages.
- - static broadcast, dynamic broadcast
-21. **Short Answer:** What are some examples of broadcast receivers in Android?
- - Examples include battery level receiver, network connectivity receiver, SMS receiver, 
-and power state receiver.
-22. **Fill in the Blank:** Content providers allow apps to ______ data with others.
- - share
-23. **Short Answer:** What are the categories of sensors in mobile devices?
- - Categories include motion sensors, environment sensors, and position sensors.
-24. **Fill in the Blank:** A sensor that measures ambient air temperature and pressure is 
-categorized under ______ sensors.
- - environment
-25. **Short Answer:** Why is mobile application testing needed?
- - Mobile application testing is needed because the end user's device can vary widely in 
-terms of hardware, screen size, resolution, and operating system.
-### Hard Questions:
-26. **Short Answer:** What should be done before a mobile app’s first release?
- - Before the first release, research on OS and devices, set up a test bed, create a test 
-plan, select automation tools, and define testing techniques or methods.
-27. **Fill in the Blank:** Performance testing ensures that an application performs tasks 
-quickly and ______.
- - efficiently
-28. **Short Answer:** What are the best practices in Android app testing?
- - Best practices include careful device selection, comprehensive application testing, 
-connectivity testing, and choosing between manual and automated testing.
-29. **Fill in the Blank:** The Android runtime includes core libraries and the ______ Virtual 
-Machine.
- - Dalvik
-30. **Short Answer:** What is the significance of UI and UX in mobile application 
-development?
- - UI involves the visual and interactive design, while UX focuses on enhancing user 
-satisfaction by meeting user needs and improving the overall experience.
-31. **Fill in the Blank:** An object used to request an action from another app component 
-is known as an ______.
- - intent
-32. **Short Answer:** Describe the life cycle of a service in Android.
- - The service life cycle involves starting the service, running in the background, and 
-stopping the service when it's no longer needed.
-33. **Fill in the Blank:** ______ is a fundamental component that allows apps to share data 
-with others.
- - Content providers
-34. **Short Answer:** What are the best practices for using sensors in mobile 
-applications?
- - Best practices include using appropriate sensors, minimizing sensor usage, testing on 
-multiple devices, and respecting user privacy.
-35. **Fill in the Blank:** The ______ compilation method is used by ART, while Dalvik uses 
-______ compilation.
- - AOT, JIT
-36. **Short Answer:** What are the testing types for mobile apps?
- - Testing types include functional testing, UI testing, compatibility testing, interface 
-testing, network testing, performance testing, installation testing, security testing, field 
-testing, and interrupt testing.
-37. **Fill in the Blank:** In the context of testing, a ______ is a configuration designed for 
-execution or performance testing.
- - test bed
-38. **Short Answer:** What are the features of the Android platform?
- - Features include an attractive UI, storage, media support, messaging, multi-touch 
-capability, WiFi, and connectivity.
-39. **Fill in the Blank:** The layer of Android platform architecture that handles networks 
-and a wide range of device drivers is the ______ kernel.
- - Linux
-40. **Short Answer:** What are the uses of Kotlin in mobile development?
- - Uses include web development, mobile app development, server-side development, 
-and data science.
-41. **Fill in the Blank:** Kotlin can interoperate with ______ language.
- - Java
-42. **Short Answer:** What factors should be considered before starting app 
-development?
- - Factors include budget, choice of mobile platform, target audience, and market 
-research.
-43. **Fill in the Blank:** ______ is the process of evaluating and verifying that a software 
-product does what it is supposed to do.
- - Software testing
-44. **Short Answer:** What is the role of an Automation tool in app testing?
- - Automation tools help in executing pre-defined tests automatically, saving time and 
-improving testing accuracy.
-45. **Fill in the Blank:** ______ Virtual Machine is specifically designed and optimized for 
-Android.
- - Dalvik
-46. **Short Answer:** What are some examples of mobile testing tools?
- - Examples include Kobiton, TestProject, TestingBot, Testroid, and MonkeyRunner.
-47. **Fill in the Blank:** The ______ testing type ensures an application works under 
-different accessibility scenarios.
- - accessibility
-48. **Short Answer:** What is the 60-30-10 rule in UI design?
- - The 60-30-10 rule is a design principle that dictates the proportion of colors used in the 
-user interface: 60% dominant color, 30% secondary color, and 10% accent color.
-49. **Fill in the Blank:** ______ is a comprehensive mobile development platform that 
-provides tools for building high-quality apps.
- - Firebase
-50. **Short Answer:** What are the disadvantages of using cross-platform mobile 
-applications?
- - Disadvantages include loss of flexibility, poor user experience, and difficulty in satisfying 
-all users.
+1.INTRODUCTION TO CLOUD COMPUTING
+
+Traditional it process -> decision to go ahead , issued purchase order , HW implementation , Software implementation , Go market 
+
+Cloud better alternative->provision environments(server , network , storage , database) , pay as you go , add/remove capacity , destroy and stop . 
+
+Why need cloud-> Business Agility , Customer Experience , Cost
+Before cloud ->every company have own data centers , expensive implementations ,and maintains , had maintain specialized engineers to maintain to data center 
+With cloud ->no need to maintain datacenter , consumer resource as u wish and pay for what u consume , no need to buy datacenter , network also .
+
+Cloud computing->Cloud computing is a model that allows convenient, on-demand access to shared computing resources (like networks, servers, storage, and applications). These resources can be quickly provisioned or released with minimal management or involvement from service providers.
+
+Characterize of cloud -> On-demand self-service: Access resources like servers and storage anytime without human assistance.,Broad network access: Services are accessible over the internet from any device.,Resource pooling: Shared resources serve multiple users with dynamic allocation.,Rapid elasticity: something immediately  happening or automatically happening .,Measured service: Pay only for what you use, monitored and controlled automatically
+Cloud is not technology , cloud can be , business model , delivery model .
+
+cloud service model 
+IAAS ->provider-(ex: create networking , storage , servers , virtualization). Provider manage underlying physical cloud infrastructure and the virtualization layer. Consumer want create applications , data and os. Compute Content Delivery Networks Storage Service Management Backup and Recovery.
+PAAS ->providers- (ex:create os , virtualizations , servers , storage , networking ). Consumer does not manage infrastructure or application And do limited user specific application configuration changes. Email and Office Productivity CRM , Document Management Enterprise Resource Planning(ERP).
+SAAS -> Use the providers application running on cloud , Consumer does not manage infrastructure or application , Email and Office Productivity Customer Relationship Management , Document Management Enterprise Resource Planning.
+
+actors in cloud computing -> Cloud Consumer : is an individual or organization that uses services from cloud providers while maintaining a business relationship with them., Cloud Provider : person, organization, entity responsible for making a service available to interested parties.,Cloud Auditor: is an entity that performs independent assessments of cloud services, focusing on their operations, performance, and security. ,Cloud Broker : manages the use, performance, and delivery of cloud services while facilitating relationships between cloud providers and consumers.,Cloud Carrier : is an intermediary that provides connectivity and transport of cloud services between providers and consumers.
+
+Cloud development model ->   Public cloud :Provisioned for open use by the general public, Operated by a service provider organization, Located on premise of the cloud provider ,(PUBLIC CLOUD Characteristics : Cost-effective, On-demand virtually unlimited scalability , Zero maintenance , Continuous up time , Low level of data security .) ex: public  - Amazon Web Services (AWS), Microsoft Azure, Google Cloud Platform (GCP)
+Private cloud ->  Provisioned for exclusive use by a single organization, Multiple business units may consume it Can be owned and managed by the organization, a third party or a combination May be located on or off premises.(PUBLIC CLOUD Characteristics: High data security , Less risky , Reliable ,Single tenant &compliance.)ex: private - Amazon Web Services (AWS), Microsoft Azure, Google Cloud Platform (GCP)
+Community cloud -> consumers with shared concerns may be security, regulatory requirements, compliance etc. Can be owned, managed and operated by an organization in the community, a third party or a combination. ex: GovernmentClouds . ex : Hybrid Cloud - Microsoft Azure Stack, AWS Outposts, Google Anthos
+hybrid cloud  ->Combination of private and public clouds  , May enable portability of data and applications within The clouds by standards or proprietary technologies (Characteristics : Secure and safe ,Cost-effective , Flexibility and scalability , Portability between private &public , Data transfer)ex :  Community Cloud - Government Cloud (e.g., AWS GovCloud, Google Government Cloud
+
+Cloud service providers –> Amazon Web Services (AWS) , Microsoft Azure  , Google Cloud Platform (GCP) , IBM Cloud  , Alibaba Cloud  , Oracle Cloud Infrastructure (OCI) 
+
+2. CLOUD CORE SERVICES AND GLOBAL INFRASTRUCTURE
+
+Cloud Global Infrastructure -> provide how they design and build there environment with flexible, reliable, scalable, and with high-quality global network performance.
+
+Benefit of Cloud Global Infrastructure ->security, availability, performance , scalability,flexibility
+
+Main component of Cloud Global Infrastructure -> region , availability zone , data enter 
+
+Core cloud services ->Compute ,  Network , Storage.
+
+1.AWS services -> foundation services , application services , deployment and management 
+2.Azure services platform -> media & CDN , application platform , data , integration , compute services , developer services , analysis & IOT 
+
+Shared responsibility model -> in cloud computing domain , we have each and every cloud service providers have shared responsibility model. Security of the Cloud , Security in the Cloud.
+AWS ->
+1. customer – customer data , platform , applications , identify , Operating system , network & firewall configuration 
+2.providers – software ( compute , storage , network) ,Hardware (regions , availability zone , edge locations)
+
+How do you pay for cloud services providers ->pay for what u use , pay less you reverse , play less when u use more.
+
+Services limits ->Default quotas ,  Quota is region specific ,  Soft limits – can be increased upon requests Hard limits – cannot be increased ,  Limit potential excessive charges Limit overuse of resources by a single entity.
+
+3. CLOUD COMPUTE
+
+Virtualization –> application , dependencies , guest os , have hypervisor , hardware ,Containerization –> container , application xyz , app dependencies, have docker engine , host os , hardware 
+
+Software define compute ->Software-defined compute virtualizes and abstracts computing functions from hardware, allowing workloads to be distributed across multiple processing units. It uses generic, industry-standard hardware, making it easy to expand resources as needed.
+
+Cloud Compute ->
+1.Amazon EC2 : AWS’s offering of virtual machines in cloud, Provided as an IaaS ,Pre-configured templates (AMI) , Per second billing
+2.Azure VM : Microsoft’s offering of virtual machines in cloud ,Provided as an IaaS ,Pre-configured templates (marketplace) ,Per minute billing
+
+Instance Types ->General Purpose (maintain cpu , memory , capacity ), Compute Optimized (more focusing for processing part) , Memory Optimized (want to more memory in VM machine), Storage Optimized(maintain storage ), accelerated Computing(process things past manner) , Burstable Instances
+
+
+Tenancy (how to share recources ) -> default - (when you want use resorces it will recieve and if you don't use release for others) , dedicated - (the instances/VM is dedicated only for a particular customer, not use by other customers),desicate host :( have seperate resorces and it can be have only for dedicate customers, not use by others)
+
+Purchasing options->On-demand Instances, Reserved Instances ,Spot Instances, Savings Plan
+
+Placement Groups -> AWS (Cluster Placement Groups, Partition Placement Groups , Spread Placement Groups) , Azure (Proximity Placement Groups)
+
+Software defined storage->a storage architecture that abstracts data storage resources from its underlying hardware.
+
+Types of Storage -> Block Storage , File Storage , Object Storage
+
+Block Storage -> Manages data as blocks within sectors and tracks,  Set of blocks can be organized as a file system , Suitable for structured data (file systems, databases, logs) , optimized for block level performances , Performance measured in IOPS , AWS –Elastic Block Storage , Azure –Azure Disks (Page Blob Storage)
+File Storage ->Manages data as a file hierarchy , Storage managed the underlying data on disk , Storage server uses block storage with a local file system Protocols supported , Network File System (NFS) Server Messaging Protocol (SMB) , AWS –Elastic File System (EFS) , Azure –Azure Files (File Storage
+Object Storage ->Manages data as objects , Each object consists of 1.Data 2.Metadata 3.Globally unique, identifier Clients can access through HTTPS or APIs or SDKs , AWS –Simple Storage Service (S3), Azure –Azure Blobs
+
+Object storage features->versioning , encryption (Client side ,Server Side(Versioning, Service Managed Keys, Customer Managed Keys, Customer Provided Keys) , web hosting , immutability (time based retention , legal hold)
+
+Object storage tiers ->CSPs offer different access tiers designed for different use cases., AWS(Standard Intelligent Tiering, Infrequent Access , Glacier) , Azure (Hot , Cold , Archive)
+
+Other Important Aspects of Cloud Storage -> Archiving and Backup ,  Hybrid Storage, Bulk Data Transfer
+
+4.CLOUD NETWORKING 
+
+Software Defined Networking (SDN) ->allows dynamic, programmable management of network resources. Decouples control and forwarding planes, making network infrastructure more flexible and scalable.
+Network Function Virtualization (NFV) -> NFV is a network architecture that decouples physical network functions (PNF) from proprietary hardware appliances.
+Cloud-native Network Functions (CNF) ->CNF is the successor of VNFs. It is a software implementation of a PNF that runs inside a Linux container.
+
+Advantages of CNF  -> Auto-scaling ( speed , flexibility , efficiency) , Deployment (supports DevOps and CI/CD) ,  Security  , monitoring
+
+SDN vs. NFV 
+Similarities ->Both use network abstraction. ,  Both rely on virtualization.
+Differences:->SDN separates control from forwarding functions; focuses on overall infrastructure. , NFV abstracts network functions (like firewalls) from hardware; focuses on specific functions.
+
+Virtual Networks-> Isolated cloud network with IP ranges and subnets. , Supports peering if IPs don’t overlap.  Examples: AWS VPC, Azure VNet
+
+Virtual Network Interfaces ->Logical network components representing Network Interface Cards (NICs).Allows instances to communicate with others or the internet. (Features:Attaches to compute instances. ,Can have both public and private IPs. ,  Multiple interfaces can attach to one instance.) ,Examples AWS-> Elastic Network Interface (ENI) ,  Azure: Network Interface Card (NIC)  
+
+Subnets -> Divide a network into smaller segments to organize and control IP traffic. (Rules:Subnet ranges (CIDR blocks) cannot overlap.,Control access using Access Control Lists (ACLs).
+AWS:Public Subnet: Can connect directly to the internet.Private Subnet: Cannot connect to the internet directly.
+Azure: No separate public/private subnets; uses route tables for similar control.
+
+Access Controlling ->Implements a simple firewall functionality to control inbound and outbound traffic to a subnet / virtual network interface.
+ACL Rules Include-> Rule number, Protocol , Port ranges , IP ranges ,  Action.
+Usage->  AWS Security Groups ( For EC2 instances) , AWS NACL (Network Access Control Lists) For subnets. , Azure NSG (Network Security Groups)  For subnets and network interfaces.
+
+Stateful vs Stateless Rules
+Stateful Rules ->Only need to specify the security rule for the request, no need to specify a security rule for the response.
+Stateless Rules->Need to specify security rules for the request as well as the response.
+Implementations-> AWS SG: Stateful  , AWS NACL: Stateless , Azure NSG: Stateful.
+
+Network Gateway Services ->  Internet Gateway ,  NAT Gateway , VPN Gateway , Network Transit Gateway
+
+Internet Gateway (IGW) ->Connects your cloud network to the internet. No bandwidth limits, scales automatically. Used in AWS; Azure uses default gateways for internet access.
+
+NAT Gateway - > Allows private servers to access the internet while blocking inbound traffic from outside. Must be set up in a public subnet. Implementations : AWS NAT Instance, AWS NAT Gateway , Azure Virtual Network NAT
+
+VPN Gateway ->Creates encrypted tunnels over the internet for secure communication between cloud and on-premises networks. Examples: Azure VPN Gateway , AWS Virtual Private Gateway
+Two types of VPN services
+1.Site-to-Site VPN: Connects a cloud network with on-premises networks.
+2.Point-to-Site VPN: Connects individual devices (like laptops) to a cloud network using special software.
+
+Azure: Supports both Site-to-Site and Point-to-Site. , AWS:  Site-to-Site via Virtual Private Gateway , Point-to-Site via AWS Client VPN.
+
+Network Transit Gateway ->A service that connects multiple virtual networks and on-premises networks using a central hub. Architecture: Uses a hub-and-spoke model for efficient connectivity.  Examples: AWS Transit Gateway , Azure Virtual WAN
+
+Network Peering ->Connects and allows communication between two virtual networks. , Can connect multiple virtual networks, even across different accounts/subscriptions. , Each network can peer with multiple others.
+(Limitations-> No transitive peering: If VNet A is peered with VNet B, and VNet B is peered with VNet C, A cannot communicate with C directly. Implementation: Available on both AWS and Azure platforms.)
+
+Bastion Hosts -> securely connects to private servers without exposing them to the internet, using a public IP in a public subnet.) How it works->Connects to private servers without exposing them to the internet. , Must be set up in a public subnet and given a public IP.
+
+
+Hybrid Connectivity ->Ways to connect cloud networks with on-premises or remote users.
+1.Connecting Remote Users->Options include direct internet access or VPNs (e.g., Azure Point-to-Site, AWS Client VPN) 
+2.Connecting Remote Networks-> ptions like Site-to-Site VPN, Azure ExpressRoute, and AWS Direct Connect for secure, dedicated connections.
+Private Access to Cloud Services 
+Private Links->Securely connect to PaaS services without using the public internet. ,Private Endpoints:Assign an IP in your virtual network for secure access to services. Azure Service Endpoints:Provide optimized access to Azure PaaS over a private network but still uses the public endpoint for traffic.
+
+Network Flow Logs->Capture information about IP traffic going in and out of your network interfaces in the virtual network (Benefits:Logs are collected without affecting network performance ,Useful for troubleshooting, security monitoring, and compliance. ) ,Examples-> Azure: Logs from NSGs, VPCs, and subnets. , AWS: Flow logs for VPCs and network interfaces.
+
+
+5. CLOUD HIGH AVAILABILITY AND DISASTER RECOVERY 
+Downtime->Refers to a period when a system is unavailable (offline))
+ Planned Downtime->Planned / scheduled downtime Maintenance, patches, reboots. , Unplanned Downtime-> Unplanned / unscheduled downtime Hardware, software, network failures, or security breaches
+ 
+High Availability (HA) ->Ensures systems remain operational for long periods. Eliminate Single Points of Failure, enable reliable crossover, and detect failures quickly.
+
+Redundancy ->Duplication of system components to increase reliability
+1.Passive Redundancy-> Extra capacity for failures. ,
+2.Active Redundancy->Automatically switches to backups
+
+Failover & Failback
+Failover-> Switch to standby systems upon failure. ,  Failback->Restoring to the original system after recovery.
+
+Replication(Sharing information so as to ensure consistency between redundant resources, such as software or hardware components, to improve reliability, fault-tolerance, or accessibility.) Active Replication: Process on all replicas. , Passive Replication: Process on one replica and sync to others.
+
+High Availability Clusters ->A group of computers ensuring continued service when components fail.
+Node Configurations :Active/Active: All nodes actively handle requests. Active/Passive: One node is active, while others are on standby. 
+Node Reliability: Storage (disk mirroring, redundant SANs), Network , Electricity
+
+Load Balancing ->Efficiently distributes network traffic across multiple servers.(Algorithms : Round Robin, Least Connections,  least time , IP Hash.)
+
+Business Continuity ->Ensures a company can keep delivering products/services during disruptions.
+
+Business Continuity Planning (BCP)->Involves creating strategies for prevention and recovery.
+
+BCP Analysis->Business Impact Analysis ,Business Threat Analysis , Business Impact Scenarios
+
+Disaster Recovery (DR) ->Part of BCP to restore systems after disasters (natural or human-made).
+
+Key Elements->DR Team: Responsible personnel. , Risk Evaluation: Assess potential threats.,  Business Critical Asset Identification: Prioritize vital assets. ,Backup Strategy: Plan for data backups. , Testing & Optimization: Regular tests to ensure readiness.
+
+Backup Strategy ->A copy of data stored elsewhere to restore after data loss. (Backup MethodsFull Backup: Complete copy of all data. , Incremental: Only changes since the last backup. ,  Differential: Changes since the last full backup. Near Continuous Data Protection: Almost real-time backups.)
+
+Recovery Objectives -> RTO (Recovery Time Objective): How quickly you need to get systems running again after a disaster. RPO (Recovery Point Objective): How much data loss is acceptable (measured in time).  RCO  (Recovery Consistency Objective): How much data inconsistency you can tolerate after recovery.
+
+6. CLOUD SECURITY AND MONITORING 
+
+Cloud security->  refers to the set of policies, technologies, and controls used to protect data, applications, and services in cloud environments from threats, breaches, and unauthorized access.
+
+Software-defined security (SDS)->is a type of security model in which the information security in a computing environment is implemented, controlled and managed by security software.),(Key Features Automates controls like intrusion detection, network segmentation, and access management using policy-driven software.)
+
+how to apply security mechanisms/concept 
+
+1.Principle of Least Privilege (PLOP)->A security concept where users/processes get only the permissions needed to do their job. Purpose: Minimizes risk by limiting access to only what's necessary.
+
+2.Identity and Access Management (IAM)->IAM enforces the Principle of Least Privilege. It’s a framework of policies to control access to resources. Purpose: Identifies, authenticates, and authorizes users to ensure they have the right access.
+IAM Components ->Logical Organization: Defines boundaries for users/processes. Users-> Individuals or services needing access. Have credentials but no default permissions. Groups-> Collections of users without their own credentials. Policies->Set permissions to allow or deny actions. Roles->Collections of policies for temporary access. Used in Role-Based Access Control (RBAC).
+
+3.Multi-Factor Authentication (MFA)->means using two or more ways to verify who you are before giving access Factors->What you have: Security token, smart card. ,What you know: Password, PIN. , What you are: Biometrics (fingerprint, face). , Where you are: GPS location.
+
+4. Federated Identity & Single Sign-On (SSO) 
+Federated Identity->Links a user’s identity across multiple systems so they don’t need separate logins.(ex: facebook )
+Single Sign-On (SSO)->Lets users log in once and access multiple systems without needing to re-enter credentials. (ex : microsoft 365 , google )
+Two Types:->Enterprise Identity Federation: For internal company systems., Web Identity Federation: For online platforms and services.
+
+Types of Encryption-> Symmetric Key: Uses one key for both encryption and decryption. ,Asymmetric Key: Uses a pair (public and private keys) for encryption and decryption.,Hashing: Converts data into a fixed-size value, irreversible.
+
+Stages of Data Encryption->Data in Use: While data is being processed. ,Data in Transit: While data is being transferred over networks. ,Data at Rest: While data is stored.
+
+Client-Side vs Server-Side Encryption-> Client-Side: Data encrypted before sending to the server. ,Server-Side: Data encrypted once it reaches the server.
+
+Cloud Security Risks & Threats ->Poor Access Management: Weak controls over user permissions can lead to unauthorized access. ,Data Breach/Leak/Loss: Sensitive data might be exposed or stolen. ,Misconfiguration: Incorrect settings can leave systems vulnerable. ,Insecure APIs: Weak APIs can be exploited by attackers. ,Account Hijacking: Attackers gaining control of cloud accounts. ,Lack of Visibility: Difficulty in monitoring and tracking cloud activities. , DoS/DDoS Attacks: Overloading cloud services to disrupt access.
+
+Monitoring in Cloud 
+Cloud Monitoring->Tracks and manages cloud operations to ensure everything runs smoothly. Methods-> Manual or automated checks to confirm websites, servers, and apps are working correctly. Example Services: Datadog,  AppDynamics , Azure Monitor , Amazon CloudWatch
+
+instances monitor methods->
+Metrics, Events & Logs ->Metrics: Raw data on resource usage (like CPU, memory). Useful for monitoring performance. ,Events: Notifications triggered by system actions (like updates or errors). Capture details on what, where, and when something happened. ,Logs: Detailed records of system activity, essential for troubleshooting and analysis.
+
+Alerts -> Triggered by changes in metrics, events, or logs to respond to issues.
+Types of Alerts->Threshold-based: Activated when a metric crosses a set limit., Anomaly Detection: Alerts on unusual patterns., Heartbeat Alerts: Triggered if regular status signals stop. , Output Types->  Notifications: Inform users via email or SMS. Automated Actions: Systems take corrective measures automatically
+
+7.CLOUD DATABASE AND ANALYTICS SERVICE 
+ 
+Database Models
+1.Relationl/SQL -> Highly structured table organization, Rigidly defined formats, Dependencies among tables, Enforce ACID (Atomicity, Consistency, Isolation, Durability), Ex: MS SQL, MySQL, Oracle, PostgreSQL, Amazon RDS
+2.Non-relational/No-SQL -> Document oriented, Large and complex queries, Supports rapidly changing design, Ex: MongoDB, Cassandra, CosmosDB, Redis, CouchDB, Aurora
+
+Database Workloads
+Online Transaction Processing (OLTP) – comparison -> Focus is on operational data, Transaction processing, Small and simple ad-hoc queries, Response in milliseconds
+Online Analytical Processing (OLAP) – comparison -> Focus is on historical data, Data analysis and reporting, Large and complex queries, Responses times from seconds to hours
+
+Different types of database models and workloads -> [Relational / OLTP (Online Transaction Processing) - Examples: Oracle, PostgreSQL, MS SQL, MySQL], [Relational / OLAP (Online Analytical Processing) - Examples: Oracle, PostgreSQL, MS SQL, MySQL], [Non-relational / OLAP - Examples: Hadoop, HDInsight][ Non-relational / OLTP - Examples: MongoDB, Cassandra, Riak]
+
+Non-relational / No-SQL Database
+Key-value store - Data is stored as indexed key-value pairs, Ideal for session data and shopping carts, Flexibility: High, Complexity: None (very simple to use), Performance: High, Scalability: High, Best suited for simple, fast data retrieval scenarios.
+Column store - Optimized for retrieving entire columns of data rather than rows, Commonly used in Content Management Systems (CMS) and blogging platforms, Flexibility: Moderate, Complexity: Low, Performance: High, Scalability: High, Great for analytical queries, especially on large datasets.
+Document store - Stores data in documents (like XML, JSON) which are schema-less, Useful for e-commerce applications and analytics where flexible data models are needed, Flexibility: High, Complexity: Low, Performance: High, Scalability: Variable (can be high), Ideal for handling semi-structured data with dynamic schemas.
+Graph database - Represents data as interconnected nodes (graphs) focusing on relationships, Best for applications where understanding relationships is crucial, such as social networks, Flexibility: High, Complexity: High, Performance: Variable (depends on the use case), Scalability: Variable, Best used where relationships and connections between data are a primary focus (e.g., social networks).
+
+CAP Theorem -> Consistency – All clients see the same view of data, even right after update or delete, Partitioning – the system continues to work as expected, even in presence of partial network failure, Availability – All clients can find a replica of data, even in case of partial node failure.
+
+Database Caching  is a buffering technique that stores frequently accessed data in temporary memory. It improves data access speed and reduces the workload on databases. Ex: Redis, Memcached
+
+Comparison Redis and Memcached
+Radis -> Open source;in-memory;key-value data store, Sub-millisecond response times, Supports various data structures (strings, lists, sets etc.), Persistent – cache survives reboots, Supports read replicas, atomic operations, backup/restore, HA
+Memcached -> Open source; in-memory; object store, Sub-millisecond response times, Supports strings and objects, Not persistent – cache does not survive reboots, Supports scaling out, multithreading
+
+Data warehouse
+A data warehouse management system is designed to support business intelligence (BI) and analytics.
+
+Primarily used for querying and analyzing large amounts of historical data. Stores structured, processed data for specific business needs.
+
+Data is collected from various sources like application logs and transaction systems.
+
+Data Loading Approaches -> ETL (Extract, Transform, Load): Data is transformed before loading, ELT (Extract, Load, Transform): Data is loaded first, then transformed.
+
+Data Lake
+A storage repository that holds large amounts of raw data in its native format until needed.
+
+Unlike data warehouses, which store data in a hierarchical structure (files/folders), data lakes use a flat architecture for data storage.
+
+Comparison DW and DL 
+DW (Processed data, Data currently in use, Used by business professionals)
+DL (Raw data, Purpose of data not determined yet, Used by data scientists)
+
+Real Time Data Processing (Stream Processing)
+It is a fast processing technique that handles data immediately upon input, ensuring quick and accurate outputs.
+
+Requires a constant stream of incoming data for continuous, ongoing processing.
+
+8.CLOUD MIGRATION 
+
+Cloud Migration is the movement of a meaningful portion of your organization’s existing IT assets to the cloud.
+
+Migration Process
+1.Opportunity evaluation -> reasons to move resources to cloud : Hardware reaching end-of-life, Expiring data center leases, Boosting productivity, Supporting global expansion, Mergers & acquisitions, Standardizing architectures
+2.Portfolio discovery and planning -> What is in your current environment?, What are the interdependencies?, Which systems should you migrate first?, How will you execute the migration?, Tools: AWS Discovery Service, Azure Migrate Service, and third-party migration tools.
+3.Application design (iterate)
+4.Migration and validation (iterate) -> Testing & Decommissioning: Run parallel environments temporarily if needed, Gradually switch traffic and users to the new cloud system, Perform a full cutover once the cloud environment is stable. 
+5.Operate -> Modern operating models: Devops, Noops, FinOps, SecOps
+
+Cloud Migration strategies
+1.Gartner’s 5 R’s strategy (Rehost, Refactor, Revise, Rebuild, Replace)
+2.Azure’s 4 R’s strategy (Rehost, Refactor, Re-architect, Rebuild)
+3.AWS’s 6 R’s strategy (Rehost, Re-platform, Repurchase, Refactor/ Re-architect, Retire, Retain)
+
+Rehost -> Known as lift-and-shift, Does not require application / code changes, migrate applications as-is to cloud, Optimize, re-architect applications once they are in cloud
+Re-platform -> Known as lift-tinker-and-shift, Migrating to a different platform without changing the core architecture of the application, Ex: Migrating web sites from VMs to PaaS (i.e. Azure App Service, Amazon Elastic Beanstalk etc.), Migrating databases from VMs to PaaS (i.e. Amazon RDS, Azure SQL etc.), Changing the platform of databases (i.e. from Oracle to PostgreSQL etc.), Changing the platform of application logic (i.e. from Oracle WebLogic to Apache Tomcat etc.)
+Repurchace -> Moving to a different platform, mainly to a SaaS platform, Ex: Moving a CRM to Salesforce.com, Moving an HRIS to Workday, Moving a CMS to SharePoint
+Refactor/Re-architect/Rebuild -> Re-imagine the application using cloud-native features for better optimization, Enhancing cloud-native features like performance, scalability, agility, and business continuity, Involves migrating monolithic apps to microservices or serverless architectures, Most expensive migration strategy
+Retire -> Get rid of applications that are no longer useful and can be turned off, Ex: More attention to important applications, Reduce the security risks, Cost savings.
+Retain -> Revisit migrating these applications later, or do nothing for now, Ex: Recently purchased / upgraded applications that cannot be migrated at this point, Sunsetting applications, Low priority applications
+
+Cloud Migration Challenges
+Cost of migration -> Focus on planning, Follow an incremental adaptation process, Use a hybrid cloud approach
+Resistance to Adapt ->Get the leadership buy-in, Choose intuitive tech solutions
+Shortage of Skills -> Invest in expert training and resources, Build a culture of continuous learning, Get help from vendors to skill up in-house resources
+
+9. CLOUD NATIVE APPLICATION 
+
+Monolithic Architecture 
+Traditional way of building applications, Built as a single and indivisible unit, Usually contains(A client-side UI, A server-side application, A database, A middleware)
+
+Strengths -> Less cross-cutting concerns (i.e. handling functions like logging, caching, monitoring etc.), Easier debugging and testing, Simple to deploy, Simple to develop
+Weaknesses -> Too complex to understand, Challenging to make changes, Cannot scale components independently, Difficult to apply new technologies / features.
+
+Microservices Architecture
+Break down an application into smaller, independent units called microservices, Each unit performs a specific process as a separate service, Built as independently deployable modules, Services communicate through predefined APIs, Each service can be updated and scaled independently.
+
+Strengths -> Independent components, Easier understanding, Better scalability, Flexibility in choosing the technology, Higher level of agility
+Weaknesses -> Extra complexity of a distributed system, Cross-cutting concerns, Harder to debug and test.
+
+Comparison of monolithic and microservices
+Monolithic -> Contains all functionality in one unit, organized by layers (web, business, data), Scales by duplicating the entire app on multiple servers/VMs/containers.
+Microservices -> Breaks functionality into smaller, independent services, Scales by deploying each service separately across servers/VMs/containers.
+
+State in monolithic and microservices approaches
+Monolithic -> single monolithic Database, tiers of specific technologies
+
+Microservices 
+Stateless - Do not maintain internal state; data can be retrieved externally. Ex: Web frontends, protocol gateways, Azure Cloud Services.
+Stateful - Maintain persistent data, such as databases, documents, user profiles. Ex: workflows, shopping carts, etc.
+
+Cloud-native computing 
+A modern approach to build scalable, resilient applications leveraging cloud capabilities, Pioneered by companies "born in the cloud" like Netflix, Spotify, Uber, and Airbnb
+
+Cloud Native Computing Foundation (CNCF) : promotes cloud-native practices everywhere, focusing on containerization, Enabling applications to run in dynamic environments (public, private, hybrid clouds).
+
+12 factor app -> A set of principles for building scalable, resilient, and performant enterprise applications, Complements the principles of microservices architecture, Developed by engineers at Heroku. Ex: codebase, dependencies, config, port binding
+
+Cloud native tools -> Cloud Delivery Model (Manages provisioning, consumption, and resource management), Containers (Enhances application manageability, scalability, and security), Microservices (Breaks down functionality into smaller, specialized services), Service Mesh(Manages service-to-service communication for scalability and security), Orchestration(Automates deployment, operation, and scaling of microservices.)
+
+Cloud native practices 
+Devops -> integrates Development, IT Operations, and Quality Assurance (QA) to streamline software delivery, Continuous loop of planning, coding, building, testing, releasing, deploying, monitoring, and feedback.
+SRE -> A model defined by Google as a set of best practices for ensuring digital business reliability, Monitoring, incident response, root cause analysis, capacity planning, testing, and release management, Focuses on combining software engineering with IT operations to enhance system reliability.
+NoOps -> DevOps practitioners are freed from managing operations and can focus entirely on software development, Achieved through full automation of operational tasks, eliminating the need for manual intervention.
+CI (continuous integration) -> Automates the integration of code changes from multiple contributors into a single project, Developers frequently merge code into a central repository, Automated builds and tests ensure code correctness before integration.
+CD(continuous delivery and deployment) 
+
+  1.Continuous Delivery: Automates testing to ensure code changes are stable for deployment. Requires manual approval for release.
+  2.Continuous Deployment: Automatically deploys code changes to production once tests pass, without manual intervention.
+
+CICD tools  -> Jenkins, gitlab, github, bitbucket, CircleCI, TeamCity, Bamboo, Travis CI
+CICD Services -> Azure Devops Services (Azure Boards, Azure Pipelines,Azure Repos, Azure Test Plan, Azure Artifacts), AWS DevOps Services (AWS CodePipeline, AWS CodeBuild, AWS CodeDeploy, AWS CodeStar), Google DevOps Services (Cloud Build, Artifact Registry, Binary Authorization, Tekton, Spinnaker, Operations Suite)
+
+Application Modernization -> Involves refactoring, repurposing, or consolidating legacy software to better align with current business needs. To generate new business value from existing applications.
+
+Application modernization journey -> Rehost(Traditional app), Refactor(Existing app hosted as container or executable), Rearchitect(Existing application + new microservices), Rearchitect(Parts of existing application rearchitected), Rearchitect/rebuild(Transformed microservices application)
+
+10. INTRODUCTION TO CONTAINERIZATION , CONTEINER ORCHESTRATION AND INFRASTRUCTUR AS CODE (IaC)
+
+Containerization is a software deployment method that packages an application’s code along with all necessary files and libraries, enabling it to run consistently across different environments.
+
+Containers vs VMs
+Containers -> Shares the host operating system's kernel, More portabl, Faster to start up and shut down, Uses fewer resources, Good for portable and scalable applications
+VM s -> Has its own kernel, Less portable, Slower to start up and shut down, Uses more resources, Good for isolated applications
+
+How Containers Work (layered structure)
+
+1.Hardware: At the bottom, includes CPU, disk, and network interfaces.(infastructure)
+2.Host OS & Kernel: Acts as a bridge between software and hardware.
+3.Container Engine: Sits atop the Host OS, managing containers.(applications)
+4.Containers: Run on top, containing application code, binaries, and libraries, isolated in user spaces.
+
+Benefits of containerization -> Portability, Scalability, Fault tolerance, Agility
+
+Containerization tools -> docker, podman, LXC, Amazon elastic container registry
+
+Container Orchestration -> A technology that automates the management of containers
+
+Needs of container orchestration -> Manages multiple containers across various hosts, Ensures uptime, load balancing, and scalability, Solves challenges of manual scaling and deployment. 
+
+Benefits of Container Orchestration -> Enables automatic starting, stopping, and management of containers, Helps developers scale cloud applications accurately, reducing human errors, Ensures containers are deployed with the right resources.
+
+Container Orchestration tools -> Kurbernetes, Docker swarm, AWS ECS, Mesos, Nomad
+
+Infrastructure as Code (IaC) -> automates the provisioning and management of infrastructure using code rather than manual processes, Reduces errors and time consumption, especially when managing applications at scale.
+
+Benefits of IaC -> Easily duplicate an environment, Reduce configuration errors, Iterate on best-practice environments
+
+How IaC Works -> IaC describes system architecture using configuration files (e.g., YAML, JSON, HCL), Treats infrastructure as code, similar to application development, Can be written in languages like Python or Java, Supports integrated development environments (IDEs) for error checking, Managed under version control, with changes tracked via commits.
+
+IaC Tools -> Terraform(Cloud-agnostic IaC tool), Aws cloud formation (AWS-native solution), Pulumi( Cloud-agnostic IaC tool), Ansible, Puppet, Chef (Configuration management with IaC capabilities)
+
+Barriers for it innovation  -> time – time to market , cost – cost of converting idea into reality  , risk – risk of false
+
+AWS elastic cache  - Managed in memory key value data store service
+AWS CloudTrail  - to monitor, log, and track activity across your AWS environment
+AWS Code Build  - automates the process of compiling source code, running tests, and producing software packages ready for deployment
+AWS Code Commit - help teams securely store and manage their source code, binaries, and other assets in the cloud
+Amazon S3 Glacier - optimized for long-term data archiving and cold storage.
+Spring Boot Actuator  - help monitor, manage, and gather insights into your Spring Boot application
+Docker images – command with images in docker 
+Amazon S3 - to store and retrieve any amount of data from anywhere on the web
+Security group - Acts as firewall that control the traffic allowed to reach one or more instance
+Amazon CloudFront  - securely delivers content to users with low latency and high transfer speeds by caching content at edge locations around the world
+Amazon DynamoDB   - fully managed NoSQL database service designed for applications
+Amazon Redshift  - fully managed data warehousing service designed for large-scale data analytics and business intelligence
+AWS CloudFormation  - fully managed Infrastructure as Code (IaC) service that allows you to define, provision, and manage AWS resources using templates written in JSON or YAML
+Edge Location - data center within the Amazon Web Services (AWS) Content Delivery Network (CDN)
+AWS Code Star -fully managed service that simplifies the process of developing, building, and deploying applications on AWS
+AWS Lambda  - a serverless compute service that allows you to run code in response to events without having to provision, manage, or scale servers
+Blue-Green Deployment - a release management strategy used to minimize downtime and reduce the risk of introducing changes to production environments.
+ 
